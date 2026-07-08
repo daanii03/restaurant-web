@@ -1,11 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-  
   --font-serif: "EB Garamond", serif;
   --font-sans: "Hanken Grotesk", sans-serif;
-}
-
-h1,h2,h3,h4,h5,h6,a{
-    color: #e0ded9;
+  --color-primary: #e0ded9;
+  --color-muted: #bdc0c0;
+  --color-accent: #D48C45;
+  --color-accent-light: #f4b471;
+  --color-base: #141412;
+  --color-elevated: #1a1a18;
+  --color-card: #252524;
+  --color-hero: #0a0b0d;
 }

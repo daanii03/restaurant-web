@@ -1,11 +1,16 @@
 ---
-
+const pathname = Astro.url.pathname;
+const default_style =
+  "text-primary hover:text-accent transition-colors duration-300 ease-in-out";
+const is_active = "text-accent";
 ---
 
-<header class="bg-[#1a1a18] grid grid-cols-3 p-4">
-  <h1 class="text-2xl p-4 font-serif ">Tu Restaurante</h1>
-  <nav class="flex gap-2 justify-self-center p-4">
-    <a href="/">Inicio</a>
-    <a href="/menu">Carta</a>
+<header class="bg-elevated sticky top-0 z-10 sm:grid grid-cols-3 p-4 items-center">
+  <h1 class="text-primary text-2xl p-4 font-serif text-center sm:text-start ">Tu Restaurante</h1>
+  <nav class="hidden sm:flex gap-2 justify-self-center p-4">
+    <a class={pathname === "/" ? is_active : default_style} href="/">Inicio</a>
+    <a class={pathname === "/menu" ? is_active : default_style} href="/menu"
+      >Carta</a
+    >
   </nav>
 </header>
