@@ -1,0 +1,53 @@
+---
+const pathname = Astro.url.pathname;
+const is_active = "text-accent-light";
+const home_class = pathname === "/" ? is_active : "text-primary";
+const menu_class = pathname === "/menu" ? is_active : "text-primary";
+---
+
+<nav
+  class="sticky bg-hero bottom-0 z-10 flex justify-center items-center gap-6 py-3 rounded-2xl sm:hidden"
+>
+  <div class="flex flex-col items-center">
+    <a href="/" class={home_class}>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="icon icon-tabler icons-tabler-outline icon-tabler-home"
+        ><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path
+          d="M5 12l-2 0l9 -9l9 9l-2 0"></path><path
+          d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"></path><path
+          d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"></path></svg
+      >
+    </a>
+    <h3 class="text-primary">Inicio</h3>
+  </div>
+  <div class="flex flex-col items-center">
+    <a href="/menu" class={menu_class}>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="icon icon-tabler icons-tabler-outline icon-tabler-tools-kitchen-3 {menu_class}"
+        ><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path
+          d="M7 4v17m-3 -17v3a3 3 0 1 0 6 0v-3"></path><path
+          d="M14 8a3 4 0 1 0 6 0a3 4 0 1 0 -6 0"></path><path d="M17 12v9"
+        ></path></svg
+      >
+    </a>
+    <h3 class="text-primary">Menu</h3>
+  </div>
+</nav>
