@@ -1,4 +1,45 @@
 ---
+import { Image } from "astro:assets";
+import AllergenCard from "@components/AllergenCard.astro";
+import type { Allergen, Dish } from "../db/schema";
+import { getDishImage } from "../utils/images";
 
+export interface Props {
+  dish: Dish;
+  allergens: Allergen[];
+}
+
+const { dish, allergens } = Astro.props;
+const image = getDishImage(dish.image ?? '');
 ---
 
+<div class="bg-card flex flex-col gap-1 rounded-xl">
+  {image && (
+    <Image
+      class="rounded-t-xl"
+      alt={dish.name}
+      width={300}
+      height={200}
+      src={image}
+    />
+  )}
+  <div class="flex flex-row gap-1 justify-between">
+    <h2 class="text-primary font-serif text-xl px-4">{dish.name}</h2>
+    <div class="flex flex-col px-3">
+      <h2 class="text-accent-light text-end text-sm">{dish.price.toFixed(2)}€</h2>
+    </div>
+  </div>
+  {dish.description && (
+    <p class="text-accent-light px-4 pb-2 text-sm">{dish.description}</p>
+  )}
+  {allergens.length > 0 && (
+    <div class="flex flex-col gap-2 px-4 pb-3">
+      <h1 class="text-primary text-sm">Alérgenos:</h1>
+      <div class="flex flex-row gap-2 flex-wrap">
+        {allergens.map((a) => (
+          <AllergenCard name={a.name} />
+        ))}
+      </div>
+    </div>
+  )}
+</div>
