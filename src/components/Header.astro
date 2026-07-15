@@ -1,7 +1,7 @@
 ---
-const pathname = Astro.url.pathname;
+const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
 const default_style =
-  "text-primary hover:text-accent transition-colors duration-300 ease-in-out";
+  "text-primary hover:text-accent hover:scale-105 transition duration-300";
 const is_active = "text-accent";
 ---
 

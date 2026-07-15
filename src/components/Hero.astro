@@ -1,15 +1,18 @@
 ---
-
+import { Image } from "astro:assets";
+import hero from "@assets/hero.webp";
 ---
 
 <section
   class="relative h-[80vh] max-h-200 w-full overflow-hidden flex flex-col justify-center bg-hero"
 >
-  <img
+  <Image
     class="absolute inset-y-0 left-1/2 -translate-x-1/2 w-full max-w-360 h-full object-cover
     mask-[linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)]"
-    src="/hero.png"
+    src={hero}
     alt="A close-up of a mouth-watering double cheeseburger featuring two thick beef patties, melted yellow cheese, and a layer of creamy white sauce on a shiny brioche bun against a dark background."
+    loading="eager"
+    fetchpriority="high"
   />
   <div
     class="absolute inset-0 bg-linear-to-r from-black via-transparent via-60% to-black/40"

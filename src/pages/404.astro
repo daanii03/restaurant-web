@@ -1,7 +1,31 @@
 ---
-import Layout from "../layouts/Layout.astro";
+import Layout from "@layouts/Layout.astro";
 ---
 
 <Layout>
-  <h1>Página no encontrada</h1>
+  <section class="flex flex-col justify-center items-center gap-5">
+    <div class="flex flex-col gap-4 px-4 justify-center items-center">
+      <h1 class="text-primary font-serif italic text-4xl text-center text-wrap sm:text-7xl">
+        Parece que este plato no está en nuestra carta.
+      </h1>
+      <p class="text-muted font-sans text-center">
+        La página que buscas no existe o ha sido movida a otra sección de
+        nuestra cocina.
+      </p>
+    </div>
+    <div class="flex flex-row gap-8 py-5">
+      <a
+        href="/"
+        class="font-sans border border-accent-light text-accent-light px-5 py-3 font-bold rounded-xl hover:bg-red-400 hover:text-primary hover:border-red-400 hover:scale-110 transition-all duration-300"
+      >
+        VOLVER AL INICIO
+      </a>
+      <a
+        href="/menu"
+        class="font-sans border border-accent-light text-accent-light px-5 py-3 font-bold rounded-xl hover:bg-red-400 hover:text-primary hover:border-red-400 hover:scale-110 transition-all duration-300"
+      >
+        VER LA CARTA
+      </a>
+    </div>
+  </section>
 </Layout>
