@@ -1,4 +1,4 @@
-const images = import.meta.glob('../assets/**/*.{webp,jpg,png}', { eager: true }) as Record<string, { default: any }>;
+const images = import.meta.glob('@assets/**/*.{webp,jpg,png}', { eager: true }) as Record<string, { default: any }>;
 
 export function getDishImage(imagePath: string): any {
   const filename = imagePath.split('/').pop();

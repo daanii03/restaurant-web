@@ -1,8 +1,8 @@
 ---
 import { Image } from "astro:assets";
 import AllergenCard from "@components/AllergenCard.astro";
-import type { Allergen, Dish } from "../db/schema";
-import { getDishImage } from "../utils/images";
+import type { Allergen, Dish } from "@db/schema";
+import { getDishImage } from "@utils/images";
 
 export interface Props {
   dish: Dish;
@@ -13,10 +13,10 @@ const { dish, allergens } = Astro.props;
 const image = getDishImage(dish.image ?? '');
 ---
 
-<div class="bg-card flex flex-col gap-1 rounded-xl">
+<div class="bg-card flex flex-col gap-1 rounded-xl w-full">
   {image && (
     <Image
-      class="rounded-t-xl"
+      class="w-full rounded-t-xl object-cover"
       alt={dish.name}
       width={300}
       height={200}
