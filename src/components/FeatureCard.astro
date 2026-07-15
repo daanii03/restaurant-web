@@ -1,0 +1,16 @@
+---
+export interface Props {
+  icon?: string;
+  title: string;
+  description: string;
+}
+
+const { icon, title, description } = Astro.props;
+---
+
+<div class="bg-card rounded-xl flex flex-col p-6 gap-3 justify-center">
+    <Fragment set:html={icon}/>
+    <h3 class="font-serif text-2xl text-accent-light">{title}</h3>
+    <p class="text-balance leading-relaxed text-muted">{description}</p>
+</div>
+
