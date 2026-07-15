@@ -1,10 +1,45 @@
 ---
-import Layout from "../layouts/Layout.astro";
+import DishCard from "@components/DishCard.astro";
+import Layout from "@layouts/Layout.astro";
+import Filter from "@components/Filter.astro";
+import db from "../db/connection";
+import type { Dish, Allergen } from "../db/schema";
 
+const dishes = db.prepare(`
+  SELECT d.*, c.name as category_name 
+  FROM dishes d 
+  JOIN categories c ON d.category_id = c.id 
+  ORDER BY c."order", d.id
+`).all() as (Dish & { category_name: string })[];
 
+const categories = [...new Set(dishes.map(d => d.category_name))];
+
+function getAllergensForDish(dishId: number): Allergen[] {
+  return db.prepare(`
+    SELECT a.* 
+    FROM allergens a 
+    JOIN dish_allergens da ON a.id = da.allergen_id 
+    WHERE da.dish_id = ?
+  `).all(dishId) as Allergen[];
+}
 ---
 
 
-<Layout title="Tu Restaurante - Menu">
-
+<Layout title="Tu Restaurante - Menu" justify="start">
+    <div class="px-4 py-5">
+        <Filter />
+        {categories.map((cat) => (
+            <section class="mt-6">
+                <div class="flex items-center gap-4 mb-4">
+                    <h2 class="text-accent font-serif text-2xl whitespace-nowrap">{cat}</h2>
+                    <div class="flex-1 border-b border-muted/40"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {dishes.filter(d => d.category_name === cat).map((dish) => (
+                        <DishCard dish={dish} allergens={getAllergensForDish(dish.id)} />
+                    ))}
+                </div>
+            </section>
+        ))}
+    </div>
 </Layout>
