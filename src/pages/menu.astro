@@ -2,8 +2,8 @@
 import DishCard from "@components/DishCard.astro";
 import Layout from "@layouts/Layout.astro";
 import Filter from "@components/Filter.astro";
-import db from "../db/connection";
-import type { Dish, Allergen } from "../db/schema";
+import db from "@db/connection";
+import type { Dish, Allergen } from "@db/schema";
 
 const dishes = db.prepare(`
   SELECT d.*, c.name as category_name 
@@ -27,7 +27,6 @@ function getAllergensForDish(dishId: number): Allergen[] {
 
 <Layout title="Tu Restaurante - Menu" justify="start">
     <div class="px-4 py-5">
-        <Filter />
         {categories.map((cat) => (
             <section class="mt-6">
                 <div class="flex items-center gap-4 mb-4">
