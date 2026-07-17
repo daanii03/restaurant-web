@@ -1,9 +1,163 @@
 ---
+import db from "@db/connection";
+import type { Category } from "@db/schema";
+import type { Allergen } from "@db/schema";
 
+const categories = db.prepare(`SELECT * FROM categories`).all() as Category[];
+const allergens = db.prepare(`SELECT * FROM allergens`).all() as Allergen[];
 ---
 
-<nav class="flex flex-col ">
-    <div class="border-b border-b-muted/40 flex flex-col">
-        <button class="text-primary">Todos</button>
-    </div>
+<nav class="flex flex-col">
+  <div
+    class="border-b border-b-muted/40 flex flex-row flex-wrap gap-2 py-3 px-4 justify-center md:gap-4 md:py-4 md:px-0"
+  >
+    <button
+      class="text-primary data-active:text-accent-light data-active:border-b data-active:border-b-accent-light cursor-pointer transition-colors duration-200"
+      data-active
+      data-filter-category="all"
+    >
+      Todos
+    </button>
+    {
+      categories.map((category) => (
+        <button
+          class="text-primary data-active:text-accent-light data-active:border-b data-active:border-b-accent-light cursor-pointer transition-colors duration-200"
+          data-filter-category={category.name}
+        >
+          {category.name}
+        </button>
+      ))
+    }
+  </div>
+
+  <div
+    class="border-b border-b-muted/40 flex flex-row flex-wrap gap-2 py-3 px-4 justify-center md:gap-4 md:py-4 md:px-0"
+  >
+    {
+      allergens.map((allergen) => (
+        <button
+          class="text-primary data-active:text-accent-light data-active:border-b data-active:border-b-accent-light cursor-pointer transition-colors duration-200"
+          data-filter-allergen={allergen.name}
+        >
+          Sin {allergen.name}
+        </button>
+      ))
+    }
+  </div>
 </nav>
+
+<script>
+  function initFilters() {
+    const categoryBtns = document.querySelectorAll("[data-filter-category]");
+    const allergenBtns = document.querySelectorAll("[data-filter-allergen]");
+    const dishes = document.querySelectorAll<HTMLElement>(
+      ".bg-card[data-category]",
+    );
+    const sections = document.querySelectorAll<HTMLElement>("section");
+    const noResults = document.getElementById("no-results");
+
+    let activeCategory: string | null = null;
+    const excludedAllergens = new Set<string>();
+    let isAnimating = false;
+
+    function applyFilters() {
+      dishes.forEach((dish) => {
+        const dishCategory = dish.dataset.category;
+        // El trim() evita fallos si hay espacios extra en la base de datos tras las comas
+        const dishAllergens =
+          dish.dataset.allergens?.split(",").map((a) => a.trim()) ?? [];
+
+        const matchCategory =
+          !activeCategory || dishCategory === activeCategory;
+        const matchAllergen = !dishAllergens.some((a) =>
+          excludedAllergens.has(a),
+        );
+        const shouldShow = matchCategory && matchAllergen;
+
+        if (shouldShow) {
+          dish.removeAttribute("data-hidden");
+        } else {
+          dish.setAttribute("data-hidden", "");
+        }
+      });
+
+      sections.forEach((section) => {
+        const visibleDishes = section.querySelectorAll<HTMLElement>(
+          ".bg-card[data-category]:not([data-hidden])",
+        );
+        if (visibleDishes.length === 0) {
+          section.setAttribute("data-hidden", "");
+        } else {
+          section.removeAttribute("data-hidden");
+        }
+      });
+
+      const anyVisible = [...dishes].some((d) => !d.hasAttribute("data-hidden"));
+      if (noResults) {
+        noResults.classList.toggle("hidden", anyVisible);
+      }
+    }
+
+    function triggerFilterAnimation() {
+      if (isAnimating) return;
+      isAnimating = true;
+
+      // 1. Ocultar platos suavemente
+      dishes.forEach((dish) => {
+        dish.classList.add("opacity-0", "scale-95");
+      });
+
+      // 2. Esperar a que termine la animación de Tailwind (300ms)
+      setTimeout(() => {
+        // Filtrar en el DOM
+        applyFilters();
+
+        // 3. Dar margen al navegador para procesar el display: block antes de animar la entrada
+        setTimeout(() => {
+          dishes.forEach((dish) => {
+            if (!dish.hasAttribute("data-hidden")) {
+              dish.classList.remove("opacity-0", "scale-95");
+            }
+          });
+
+          isAnimating = false;
+        }, 30);
+      }, 300);
+    }
+
+    categoryBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const el = btn as HTMLElement;
+        const cat = el.dataset.filterCategory;
+
+        // Actualizar visualmente el botón activo
+        categoryBtns.forEach((b) => b.removeAttribute("data-active"));
+        el.setAttribute("data-active", "");
+
+        // Actualizar estado y animar
+        activeCategory = cat === "all" ? null : (cat ?? null);
+        triggerFilterAnimation();
+      });
+    });
+
+    allergenBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const el = btn as HTMLElement;
+        const allergen = el.dataset.filterAllergen!;
+
+        // Toggle del alérgeno
+        if (excludedAllergens.has(allergen)) {
+          excludedAllergens.delete(allergen);
+          el.removeAttribute("data-active");
+        } else {
+          excludedAllergens.add(allergen);
+          el.setAttribute("data-active", "");
+        }
+
+        triggerFilterAnimation();
+      });
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", initFilters);
+</script>

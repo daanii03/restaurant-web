@@ -7,13 +7,14 @@ import { getDishImage } from "@utils/images";
 export interface Props {
   dish: Dish;
   allergens: Allergen[];
+  category: string;
 }
 
-const { dish, allergens } = Astro.props;
+const { dish, allergens,category } = Astro.props;
 const image = getDishImage(dish.image ?? '');
 ---
 
-<div class="bg-card flex flex-col gap-1 rounded-xl w-full">
+<div class="bg-card flex flex-col gap-1 rounded-xl w-full transition-all duration-300 ease-out data-hidden:opacity-0 data-hidden:scale-95 data-hidden:hidden" data-category={category} data-allergens={allergens.map(a => a.name).join(',')}>
   {image && (
     <Image
       class="w-full rounded-t-xl object-cover"
