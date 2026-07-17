@@ -1,0 +1,46 @@
+---
+export interface Props {
+  title?: string;
+  justify?: "start" | "center";
+}
+
+const { title, justify = "center" } = Astro.props;
+
+import "@fontsource/eb-garamond/400.css"; // Regular
+import "@fontsource/eb-garamond/700.css"; // Bold
+import "@fontsource/hanken-grotesk/400.css";
+import "@fontsource/hanken-grotesk/700.css";
+import "@styles/global.css";
+
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body class="font-sans flex flex-col min-h-screen bg-base">
+    <header class="justify-center items-center flex flex-col">
+        <h1 class="text-primary font-serif py-4 text-4xl font-bold">Tu Restaurante</h1>
+        <h2 class="text-primary font-bold">PANEL DE ADMINISTRACIÓN</h2>
+    </header>
+    <main
+      class="flex flex-col justify-center items-center py-10"
+    >
+      <slot />
+    </main>
+  </body>
+</html>
+
+<style>
+  html,
+  body {
+    margin: 0;
+    width: 100%;
+  }
+</style>

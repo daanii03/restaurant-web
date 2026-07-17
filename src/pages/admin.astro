@@ -1,9 +1,50 @@
 ---
-import Layout from "@layouts/Layout.astro";
-
-
+import LayoutAdmin from "@layouts/LayoutAdmin.astro";
+import Input from "@components/Input.astro";
 ---
 
-<Layout>
-    
-<Layout/>
+<LayoutAdmin>
+  <div
+    class="bg-elevated rounded-sm border border-muted/10 py-6 px-4 justify-center items-center flex flex-col w-80 sm:w-96"
+  >
+    <Input
+      id="email-input"
+      labelText="USUARIO O EMAIL"
+      placeholder="admin@turestaurante.com"
+      type="email"
+    />
+    <Input
+      id="password-input"
+      labelText="CONTRASEÑA"
+      placeholder="******"
+      type="password"
+    />
+    <button
+      class="text-primary font-bold bg-transparent border border-[#e5432e] hover:bg-[#e5432e] cursor-pointer transition-all duration-300 rounded-sm p-4 w-full"
+    >
+      INICIAR SESIÓN
+    </button>
+  </div>
+
+  <a
+    href="/"
+    class="flex flex-row gap-2 py-4 text-primary hover:text-accent-light hover:transition-all hover:duration-300 hover:scale-110"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      class="icon icon-tabler icons-tabler-outline icon-tabler-circle-arrow-left"
+      viewBox="0 0 24 24"
+      ><path fill="none" stroke="none" d="M0 0h24v24H0z"></path><path
+        d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18m-4-9 4 4m-4-4h8m-4-4-4 4"
+      ></path></svg
+    >
+    Volver al menú principal
+  </a>
+</LayoutAdmin>

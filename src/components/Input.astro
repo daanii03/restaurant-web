@@ -1,0 +1,22 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+export interface Props {
+  id: string;
+  placeholder: string;
+  labelText: string;
+  type: HTMLAttributes<"input">["type"];
+}
+
+const { id, placeholder, labelText, type } = Astro.props;
+---
+
+<div class="flex flex-col gap-2 py-4 w-full">
+  <label for={id} class=" text-primary font-bold">{labelText}</label>
+  <input
+    id={id}
+    class="text-primary bg-elevated border border-muted/40 rounded-sm p-2 outline-none focus:border-primary/80 transition-colors"
+    type={type}
+    placeholder={placeholder}
+  />
+</div>
