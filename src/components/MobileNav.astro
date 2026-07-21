@@ -1,15 +1,13 @@
 ---
 const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
 
+const default_class = "text-primary flex flex-col justify-center items-center";
 const is_active = "text-accent flex flex-col justify-center items-center";
-const home_class =
-  pathname === "/"
-    ? is_active
-    : "text-primary flex flex-col justify-center items-center";
-const menu_class =
-  pathname === "/menu"
-    ? is_active
-    : "text-primary flex flex-col justify-center items-center";
+const home_class = pathname === "/" ? is_active : default_class;
+const menu_class = pathname === "/menu" ? is_active : default_class;
+
+const reservation_class =
+  pathname === "/reservation" ? is_active : default_class;
 ---
 
 <nav
@@ -52,5 +50,25 @@ const menu_class =
       ></path></svg
     >
     <h3 class="text-primary">Menu</h3>
+  </a>
+  <a href="/reservation" class={reservation_class}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="icon icon-tabler icons-tabler-outline icon-tabler-calendar-due"
+      ><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path
+        d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2l0 -12"
+      ></path><path d="M16 3v4"></path><path d="M8 3v4"></path><path
+        d="M4 11h16"></path><path d="M11 16a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"
+      ></path></svg
+    >
+    <h3 class="text-primary">Reservas</h3>
   </a>
 </nav>
