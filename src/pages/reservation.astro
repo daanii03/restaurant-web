@@ -1,0 +1,93 @@
+---
+import Layout from "@layouts/Layout.astro";
+import map from "@assets/anover-tajo.webp";
+import { Image } from "astro:assets";
+import { ReservationForm } from "@components/ReservationForm";
+---
+
+<Layout title="Tu Restaurante - Reservas" justify="center">
+  <section class="flex flex-col gap-4 justify-center items-center">
+    <h1 class="text-4xl text-primary font-serif pt-4">Haz tu Reserva</h1>
+    <p class="text-primary text-wrap text-center">
+      Asegura tu mesa en Tu Restaurante. Disfruta de nuestra selección de carnes
+      maduradas y hambuguesas en el corazón de Tu Ciudad.
+    </p>
+    <div class="flex flex-col md:grid grid-cols-3 gap-6 p-6">
+      <ReservationForm />
+      <div class="relative col-span-2 overflow-hidden group h-56 md:h-72">
+        <Image
+          class="w-full h-full object-cover block"
+          src={map}
+          alt="A stylized dark map of Tu Ciudad with location pins, consistent with the reference image."
+        />
+        <div class="absolute inset-0 flex flex-col justify-end p-6">
+          <div class="flex items-center gap-2 mb-2">
+            <a
+              href="https://www.google.com/maps/search/?api=1&query=Tu%20Restaurante%2C%20Tu%20Ciudad"
+              class="text-accent-light text-sm flex flex-row gap-2 justify-center items-center hover:scale-110 transition-transform duration-300"
+              target="_blank"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="icon icon-tabler icons-tabler-outline icon-tabler-map-pin text-accent-light" viewBox="0 0 24 24"><path fill="none" stroke="none" d="M0 0h24v24H0z"/><path d="M9 11a3 3 0 1 0 6 0 3 3 0 0 0-6 0"/><path d="M17.657 16.657 13.414 20.9a2 2 0 0 1-2.827 0l-4.244-4.243a8 8 0 1 1 11.314 0"/></svg>
+              Nuestra Ubicación
+            </a>
+          </div>
+          <h3 class="text-white font-serif font-bold text-3xl">
+            Tu Ciudad
+          </h3>
+        </div>
+      </div>
+      <div class="bg-card p-4">
+        <h3 class="text-accent-light flex flex-row gap-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            class="icon icon-tabler icons-tabler-outline icon-tabler-phone"
+            viewBox="0 0 24 24"
+            ><path fill="none" stroke="none" d="M0 0h24v24H0z"></path><path
+              d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"
+            ></path></svg
+          >
+          Contacto
+        </h3>
+        <p class="text-wrap text-primary py-4">
+          Calle de Tu Restaurante, 1, 00000 Tu Ciudad España
+        </p>
+        <a
+          href="tel:+34600000000"
+          class="inline-block text-accent-light hover:scale-110 transition-transform duration-300"
+          >+34 600 00 00 00</a
+        >
+      </div>
+      <div class="bg-card p-4">
+        <h3 class="text-accent-light flex flex-row gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="icon icon-tabler icons-tabler-outline icon-tabler-clock" viewBox="0 0 24 24"><path fill="none" stroke="none" d="M0 0h24v24H0z"/><path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/></svg>
+          Horario
+        </h3>
+        <div
+          class="flex flex-row justify-between border-b border-b-muted/20 pt-4 pb-2 w-full"
+        >
+          <p class="text-primary">Lunes</p>
+          <p class="text-primary">Cerrado</p>
+        </div>
+        <div
+          class="flex flex-row justify-between border-b border-b-muted/20 pt-4 pb-2 w-full"
+        >
+          <p class="text-primary">Martes-Jueves</p>
+          <p class="text-primary">7:30-16:00</p>
+        </div>
+        <div
+          class="flex flex-row justify-between border-b border-b-muted/20 pt-4 pb-2 w-full"
+        >
+          <p class="text-primary">Viernes-Domingo</p>
+          <p class="text-primary">7:30-16:00 | 20:00-23:30</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
