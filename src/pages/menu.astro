@@ -2,25 +2,33 @@
 import DishCard from "@components/DishCard.astro";
 import Layout from "@layouts/Layout.astro";
 import Filter from "@components/Filter.astro";
-import db from "@db/connection";
+import client from "@db/client";
 import type { Dish, Allergen } from "@db/schema";
 
-const dishes = db.prepare(`
+const dishesResult = await client.execute(`
   SELECT d.*, c.name as category_name 
   FROM dishes d 
   JOIN categories c ON d.category_id = c.id 
   ORDER BY c."order", d.id
-`).all() as (Dish & { category_name: string })[];
+`);
+const dishes = dishesResult.rows as unknown as (Dish & { category_name: string })[];
 
 const categories = [...new Set(dishes.map(d => d.category_name))];
 
+const allergensResult = await client.execute(`
+  SELECT a.*, da.dish_id 
+  FROM allergens a 
+  JOIN dish_allergens da ON a.id = da.allergen_id
+`);
+const allergenMap = new Map<number, Allergen[]>();
+for (const row of allergensResult.rows) {
+  const { dish_id, ...allergen } = row as unknown as Allergen & { dish_id: number };
+  if (!allergenMap.has(dish_id)) allergenMap.set(dish_id, []);
+  allergenMap.get(dish_id)!.push(allergen as Allergen);
+}
+
 function getAllergensForDish(dishId: number): Allergen[] {
-  return db.prepare(`
-    SELECT a.* 
-    FROM allergens a 
-    JOIN dish_allergens da ON a.id = da.allergen_id 
-    WHERE da.dish_id = ?
-  `).all(dishId) as Allergen[];
+  return allergenMap.get(dishId) ?? [];
 }
 ---
 
@@ -33,7 +41,7 @@ function getAllergensForDish(dishId: number): Allergen[] {
         </p>
         {categories.map((cat) => (
             <section class="mt-6 data-hidden:hidden">
-                <div class="flex items-center gap-4 mb-4">
+                <div class="flex flex-row w-full items-center gap-4 mb-4">
                     <h2 class="text-accent font-serif text-2xl whitespace-nowrap transition-opacity duration-300 ease-out data-hidden:opacity-0">{cat}</h2>
                     <div class="flex-1 border-b border-muted/40 transition-opacity duration-300 ease-out data-hidden:opacity-0"></div>
                 </div>

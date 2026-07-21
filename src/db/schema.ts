@@ -1,22 +1,19 @@
+export interface Dish {
+  id: number;
+  name: string;
+  description: string | null;
+  price: number;
+  image: string | null;
+  category_id: number;
+}
 
 export interface Category {
-    id: number;
-    name:string;
-    order:number;
+  id: number;
+  name: string;
+  order: number;
 }
 
 export interface Allergen {
-    id: number;
-    name: string;
-    icon: string;   
-}
-
-export interface Dish {
-    id: number;
-    slug: string;
-    name: string;
-    description:string;
-    price: number;
-    category_id: number;
-    image?:string;
+  id: number;
+  name: string;
 }

@@ -1,10 +1,13 @@
 ---
-import db from "@db/connection";
+import client from "@db/client";
 import type { Category } from "@db/schema";
 import type { Allergen } from "@db/schema";
 
-const categories = db.prepare(`SELECT * FROM categories`).all() as Category[];
-const allergens = db.prepare(`SELECT * FROM allergens`).all() as Allergen[];
+const categoriesResult = await client.execute(`SELECT * FROM categories`);
+const categories = categoriesResult.rows as unknown as Category[];
+
+const allergensResult = await client.execute(`SELECT * FROM allergens`);
+const allergens = allergensResult.rows as unknown as Allergen[];
 ---
 
 <nav class="flex flex-col">
