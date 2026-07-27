@@ -1,0 +1,25 @@
+---
+export interface Props {
+  title: string;
+  value: number | string;
+  color: string;
+  colorIcon:string;
+}
+
+const { title, value, color, colorIcon } = Astro.props;
+
+const formatedValue = String(value).padStart(2,'0')
+---
+
+<div class="bg-card flex flex-col p-4 h-full">
+  <div class="flex flex-row justify-between items-center w-full rounded-sm">
+    <h2 class="text-xl text-primary">{title}</h2>
+    <div class=`${colorIcon} flex items-center justify-center`>
+      <slot name="icon" />
+    </div>
+  </div>
+  <p class=`${color} text-4xl font-serif`>{formatedValue}</p>
+  <div class="mt-auto text-sm text-primary">
+    <slot/>
+  </div>
+</div>
