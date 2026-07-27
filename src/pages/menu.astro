@@ -2,55 +2,49 @@
 import DishCard from "@components/DishCard.astro";
 import Layout from "@layouts/Layout.astro";
 import Filter from "@components/Filter.astro";
-import client from "@db/client";
-import type { Dish, Allergen } from "@db/schema";
+import { getDishesWithAllergens } from "@db/queries";
 
-const dishesResult = await client.execute(`
-  SELECT d.*, c.name as category_name 
-  FROM dishes d 
-  JOIN categories c ON d.category_id = c.id 
-  ORDER BY c."order", d.id
-`);
-const dishes = dishesResult.rows as unknown as (Dish & { category_name: string })[];
+Astro.response.headers.set(
+  "Cache-Control",
+  "s-maxage=60, stale-while-revalidate=3600",
+);
 
-const categories = [...new Set(dishes.map(d => d.category_name))];
-
-const allergensResult = await client.execute(`
-  SELECT a.*, da.dish_id 
-  FROM allergens a 
-  JOIN dish_allergens da ON a.id = da.allergen_id
-`);
-const allergenMap = new Map<number, Allergen[]>();
-for (const row of allergensResult.rows) {
-  const { dish_id, ...allergen } = row as unknown as Allergen & { dish_id: number };
-  if (!allergenMap.has(dish_id)) allergenMap.set(dish_id, []);
-  allergenMap.get(dish_id)!.push(allergen as Allergen);
-}
-
-function getAllergensForDish(dishId: number): Allergen[] {
-  return allergenMap.get(dishId) ?? [];
-}
+const dishes = await getDishesWithAllergens();
+const categories = [...new Set(dishes.map((d) => d.category_name))];
 ---
 
-
 <Layout title="Tu Restaurante - Menu" justify="start">
-    <Filter />
-    <div class="px-4 py-5">
-        <p id="no-results" class="hidden text-center text-accent-light py-10 text-lg">
-            No hay platos que cumplan los filtros seleccionados.
-        </p>
-        {categories.map((cat) => (
-            <section class="mt-6 data-hidden:hidden">
-                <div class="flex flex-row w-full items-center gap-4 mb-4">
-                    <h2 class="text-accent font-serif text-2xl whitespace-nowrap transition-opacity duration-300 ease-out data-hidden:opacity-0">{cat}</h2>
-                    <div class="flex-1 border-b border-muted/40 transition-opacity duration-300 ease-out data-hidden:opacity-0"></div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {dishes.filter(d => d.category_name === cat).map((dish) => (
-                        <DishCard dish={dish} allergens={getAllergensForDish(dish.id)} category={cat} />
-                    ))}
-                </div>
-            </section>
-        ))}
-    </div>
+  <Filter />
+  <div class="px-4 py-5">
+    <p
+      id="no-results"
+      class="hidden text-center text-accent-light py-10 text-lg"
+    >
+      No hay platos que cumplan los filtros seleccionados.
+    </p>
+    {
+      categories.map((cat) => (
+        <section class="mt-6 data-hidden:hidden" data-section="category">
+          <div class="flex flex-row w-full items-center gap-4 mb-4">
+            <h2 class="text-accent font-serif text-2xl whitespace-nowrap transition-opacity duration-300 ease-out data-hidden:opacity-0">
+              {cat}
+            </h2>
+            <div class="flex-1 border-b border-muted/40 transition-opacity duration-300 ease-out data-hidden:opacity-0" />
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {dishes
+              .filter((d) => d.category_name === cat)
+              .map((dish) => (
+                <DishCard
+                  dish={dish}
+                  allergens={dish.allergens}
+                  category={cat}
+                  isEager={dishes.indexOf(dish) < 6}
+                />
+              ))}
+          </div>
+        </section>
+      ))
+    }
+  </div>
 </Layout>

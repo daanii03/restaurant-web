@@ -1,46 +1,85 @@
 ---
 import { Image } from "astro:assets";
 import AllergenCard from "@components/AllergenCard.astro";
-import type { Allergen, Dish } from "@db/schema";
+import type { Dish } from "@db/schema";
 import { getDishImage } from "@utils/images";
+
+interface AllergenWithOption {
+  id: number;
+  name: string;
+  without_option?: number;
+}
 
 export interface Props {
   dish: Dish;
-  allergens: Allergen[];
+  allergens: AllergenWithOption[];
   category: string;
+  isEager?: boolean;
 }
 
-const { dish, allergens,category } = Astro.props;
-const image = getDishImage(dish.image ?? '');
+const { dish, allergens, category, isEager = false } = Astro.props;
+const image = getDishImage(dish.image ?? "");
+const withoutOptions = allergens.filter((a) => a.without_option === 1);
 ---
 
-<div class="bg-card flex flex-col gap-1 rounded-xl w-full transition-all duration-300 ease-out data-hidden:opacity-0 data-hidden:scale-95 data-hidden:hidden" data-category={category} data-allergens={allergens.map(a => a.name).join(',')}>
-  {image && (
-    <Image
-      class="w-full rounded-t-xl object-cover"
-      alt={dish.name}
-      width={300}
-      height={200}
-      src={image}
-    />
-  )}
+<div
+  class="bg-card flex flex-col gap-1 rounded-xl w-full transition-all duration-300 ease-out data-hidden:opacity-0 data-hidden:scale-95 data-hidden:hidden"
+  data-category={category}
+  data-allergens={allergens.map((a) => a.name).join(",")}
+  data-allergens-without={withoutOptions.map((a) => a.name).join(",")}
+>
+  {
+    image && (
+      <Image
+        class="w-full rounded-t-xl object-cover"
+        alt={dish.name}
+        width={300}
+        height={200}
+        src={image}
+        loading={isEager ? "eager" : "lazy"}
+        fetchpriority={isEager ? "high" : "auto"}
+      />
+    )
+  }
   <div class="flex flex-row gap-1 justify-between">
     <h2 class="text-primary font-serif text-xl px-4">{dish.name}</h2>
     <div class="flex flex-col px-3">
-      <h2 class="text-accent-light text-end text-sm">{dish.price.toFixed(2)}€</h2>
+      <h2 class="text-accent-light text-end text-sm">
+        {dish.price.toFixed(2)}€
+      </h2>
     </div>
   </div>
-  {dish.description && (
-    <p class="text-accent-light px-4 pb-2 text-sm">{dish.description}</p>
-  )}
-  {allergens.length > 0 && (
-    <div class="flex flex-col gap-2 px-4 pb-3">
-      <h1 class="text-primary text-sm">Alérgenos:</h1>
-      <div class="flex flex-row gap-2 flex-wrap">
-        {allergens.map((a) => (
-          <AllergenCard name={a.name} />
-        ))}
+  {
+    dish.description && (
+      <p class="text-accent-light px-4 pb-2 text-sm">{dish.description}</p>
+    )
+  }
+  {
+    allergens.length > 0 && (
+      <div class="flex flex-col gap-2 px-4 pb-3">
+        <h1 class="text-primary text-sm">Alérgenos:</h1>
+        <div class="flex flex-row gap-2 flex-wrap">
+          {allergens.map((a) => (
+            <AllergenCard name={a.name} />
+          ))}
+        </div>
       </div>
-    </div>
-  )}
+    )
+  }
+  {
+    withoutOptions.length > 0 && (
+      <div class="flex flex-col gap-2 px-4 pb-3">
+        <h1 class="text-sm text-accent-light">Opciones sin:</h1>
+        <div class="flex flex-row gap-2 flex-wrap">
+          {withoutOptions.map((a) => (
+            <div class="border border-accent-light/50 rounded-md justify-center items-center">
+              <h3 class="text-accent-light px-1.5 py-0.5 text-xs text-center">
+                Sin {a.name}
+              </h3>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
 </div>
