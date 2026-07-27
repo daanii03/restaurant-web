@@ -1,0 +1,148 @@
+---
+import { ClientRouter } from "astro:transitions";
+
+export interface Props {
+  title?: string;
+  pageTitle: string
+}
+
+const { title,pageTitle } = Astro.props;
+
+import "@fontsource/eb-garamond/400.css"; // Regular
+import "@fontsource/eb-garamond/700.css"; // Bold
+import "@fontsource/hanken-grotesk/400.css";
+import "@fontsource/hanken-grotesk/700.css";
+import "@styles/global.css";
+
+const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
+const default_style =
+  "text-primary hover:text-accent hover:scale-105 transition duration-300";
+const is_active = "text-accent";
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <ClientRouter />
+  </head>
+  <body class="font-sans min-h-screen bg-elevated md:flex md:flex-row md:h-screen md:overflow-hidden">
+    <div
+      id="backdrop"
+      class="fixed inset-0 bg-black/60 z-30 hidden"
+      data-toggle-sidebar
+    ></div>
+
+    <aside
+      id="sidebar"
+      class="bg-base w-64 p-4 flex flex-col fixed md:static inset-y-0 left-0 z-40 -translate-x-full md:translate-x-0 transition-transform duration-300 shrink-0"
+    >
+      <div class="flex items-center justify-between md:justify-start">
+        <h1 class="text-primary font-serif text-4xl">Tu Restaurante</h1>
+        <button class="md:hidden text-primary text-2xl" data-toggle-sidebar>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <nav class="pt-10 md:pt-20 flex flex-col gap-4">
+        <a
+          href="/admin/dashboard"
+          class={pathname === "/admin/dashboard" ? is_active : default_style}
+          >Gestión de la Carta</a
+        >
+        <a
+          href="/admin/reservation"
+          class={pathname === "/admin/reservation" ? is_active : default_style}
+          >Reservas</a
+        >
+      </nav>
+      <a
+        href="/"
+        class="flex flex-row gap-2 py-4 text-primary hover:text-accent-light hover:transition-all hover:duration-300 hover:scale-110 mt-auto"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          fill="none"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          class="icon icon-tabler icons-tabler-outline icon-tabler-circle-arrow-left"
+          viewBox="0 0 24 24"
+          ><path fill="none" stroke="none" d="M0 0h24v24H0z"></path><path
+            d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18m-4-9 4 4m-4-4h8m-4-4-4 4"
+          ></path></svg
+        >
+        Volver al menú principal
+      </a>
+    </aside>
+
+    <main class="w-full flex-1 flex flex-col overflow-y-auto min-h-screen md:min-h-0">
+      <header class="p-4 sticky top-0 bg-elevated z-10">
+        <div class="flex items-center justify-between w-full">
+          <button class="md:hidden text-primary shrink-0" data-toggle-sidebar>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          <h1 class="text-accent text-lg sm:text-2xl md:text-4xl font-serif text-center truncate mx-2">
+            {pageTitle}
+          </h1>
+          <div class="shrink-0">
+            <slot name="header-right" />
+          </div>
+        </div>
+      </header>
+      <slot />
+    </main>
+  </body>
+
+  <script>
+    document.addEventListener("click", (e: MouseEvent) => {
+      const target = e.target as Element;
+      if (target.closest("[data-toggle-sidebar]")) {
+        document.getElementById("sidebar")?.classList.toggle("-translate-x-full");
+        document.getElementById("backdrop")?.classList.toggle("hidden");
+      }
+    });
+  </script>
+</html>
+
+<style>
+  html,
+  body {
+    margin: 0;
+    width: 100%;
+  }
+</style>

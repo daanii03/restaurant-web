@@ -1,0 +1,41 @@
+---
+import LayoutDashboard from "@layouts/LayoutDashboard.astro";
+import FilterAdmin from "@components/Filter.astro";
+import DishCardAdmin from "@components/AdminDishCard.astro";
+import { getDishesWithAllergens } from "@db/queries";
+
+if (!Astro.cookies.has("admin_session")) return Astro.redirect("/admin");
+
+const dishes = await getDishesWithAllergens();
+---
+
+<LayoutDashboard title="Dashboard - Tu Restaurante" pageTitle="Gestión de la Carta">
+  <a
+    slot="header-right"
+    href="/admin/create"
+    class="text-primary font-bold text-xs sm:text-sm border border-brand-red hover:bg-brand-red hover:scale-105 transition-all duration-300 rounded-sm p-2 sm:p-4 whitespace-nowrap"
+  >
+    + Nuevo Plato
+  </a>
+  <FilterAdmin showAllergens={false} />
+  <section class="w-full">
+    <div class="px-4 py-5 w-full max-w-7xl mx-auto">
+      <p
+        id="no-results"
+        class="hidden text-center text-accent-light py-10 text-lg"
+      >
+        No hay platos que cumplan los filtros seleccionados.
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {dishes.map((dish) => (
+          <DishCardAdmin
+            dish={dish}
+            allergens={dish.allergens}
+            category={dish.category_name}
+            isEager={dishes.indexOf(dish) < 6}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+</LayoutDashboard>
