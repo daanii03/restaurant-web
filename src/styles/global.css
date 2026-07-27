@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+:root {
+  color-scheme: dark;
+}
+
 @theme {
   --font-serif: "EB Garamond", serif;
   --font-sans: "Hanken Grotesk", sans-serif;
@@ -11,4 +15,6 @@
   --color-elevated: #1a1a18;
   --color-card: #252524;
   --color-hero: #0a0b0d;
+  --color-brand-red: #e5432e;
+  --color-brand-red-light: #ffab9d;
 }

@@ -1,16 +1,16 @@
 ---
 export interface Props {
   title?: string;
-  justify?: "start" | "center";
 }
 
-const { title, justify = "center" } = Astro.props;
+const { title } = Astro.props;
 
 import "@fontsource/eb-garamond/400.css"; // Regular
 import "@fontsource/eb-garamond/700.css"; // Bold
 import "@fontsource/hanken-grotesk/400.css";
 import "@fontsource/hanken-grotesk/700.css";
 import "@styles/global.css";
+import { ClientRouter } from "astro:transitions";
 
 ---
 
@@ -19,10 +19,10 @@ import "@styles/global.css";
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <ClientRouter />
   </head>
   <body class="font-sans flex flex-col min-h-screen bg-base">
     <header class="justify-center items-center flex flex-col">
