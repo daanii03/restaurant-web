@@ -1,30 +1,50 @@
 ---
 import LayoutAdmin from "@layouts/LayoutAdmin.astro";
 import Input from "@components/Input.tsx";
+
+const error = Astro.url.searchParams.get("error");
+
+if (Astro.cookies.has("admin_session")) return Astro.redirect("/admin/dashboard");
+
 ---
 
 <LayoutAdmin title="Tu Restaurante - Panel de Administración">
-  <div
+  <form
     class="bg-elevated rounded-sm border border-muted/10 py-6 px-4 justify-center items-center flex flex-col w-80 sm:w-96"
+    action="/api/login"
+    method="post"
   >
+    {
+      error && (
+        <p class="text-brand-red
+ text-sm mb-4 text-center font-medium">
+          {error === "invalid_credentials"
+            ? "Usuario o contraseña incorrectos."
+            : error}
+        </p>
+      )
+    }
     <Input
       id="email-input"
+      name="email"
       labelText="USUARIO O EMAIL"
       placeholder="admin@turestaurante.com"
-      type="email"
+      type="text"
     />
     <Input
       id="password-input"
+      name="password"
       labelText="CONTRASEÑA"
       placeholder="******"
       type="password"
     />
     <button
-      class="text-primary font-bold bg-transparent border border-[#e5432e] hover:bg-[#e5432e] cursor-pointer transition-all duration-300 rounded-sm p-4 w-full"
+      type="submit"
+      class="text-primary font-bold bg-transparent border border-brand-red hover:bg-brand-red cursor-pointer transition-all duration-300 rounded-sm p-4 w-full"
     >
       INICIAR SESIÓN
     </button>
-  </div>
+  </form>
 
   <a
     href="/"
