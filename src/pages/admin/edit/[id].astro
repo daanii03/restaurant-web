@@ -1,0 +1,43 @@
+---
+import { getDishWithAllergens, getCategories, getAllergens } from "@db/queries";
+import LayoutDashboard from "@layouts/LayoutDashboard.astro";
+import { DishForm } from "@components/DishForm"
+
+const { id } = Astro.params;
+
+if (!id || isNaN(Number(id))) {
+  return Astro.redirect("/admin/dashboard");
+}
+
+const dishId = Number(id);
+
+const [dish, categories, allAllergens] = await Promise.all([
+  getDishWithAllergens(dishId),
+  getCategories(),
+  getAllergens(),
+]);
+---
+
+<LayoutDashboard
+  title={`Editar ${dish ? dish.name : "Plato"} - Tu Restaurante`}
+  pageTitle={`Editar: ${dish ? dish.name : "Plato"}`}
+>
+  <section class="w-full">
+    <div class="px-4 py-5 w-full max-w-2xl mx-auto">
+      {
+        dish ? (
+          <DishForm
+            client:load
+            dish={dish}
+            categories={categories}
+            allAllergens={allAllergens}
+          />
+        ) : (
+          <p class="text-primary font-bold text-center py-10">
+            Plato no encontrado
+          </p>
+        )
+      }
+    </div>
+  </section>
+</LayoutDashboard>

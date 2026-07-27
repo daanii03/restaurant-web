@@ -1,0 +1,15 @@
+---
+import LayoutDashboard from "@layouts/LayoutDashboard.astro";
+import { AdminReservationPanel } from "@components/AdminReservationPanel";
+---
+
+<LayoutDashboard title="Gestión Reservas - Tu Restaurante" pageTitle="Reservas">
+  <button
+    slot="header-right"
+    id="open-reservation-btn"
+    class="text-primary font-bold text-xs sm:text-sm border border-brand-red hover:bg-brand-red hover:scale-105 transition-all duration-300 rounded-sm p-2 sm:p-4 whitespace-nowrap cursor-pointer"
+  >
+    + Nueva Reserva
+  </button>
+  <AdminReservationPanel client:load />
+</LayoutDashboard>
