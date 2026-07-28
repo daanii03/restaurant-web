@@ -13,7 +13,6 @@ interface Reservation {
   reservation_date: string;
   reservation_time: string;
   status: string;
-  notes: string | null;
   created_at: string;
   table_number: number;
   capacity: number;
@@ -32,13 +31,26 @@ interface FormData {
   customer_name: string;
   customer_phone: string;
   customer_email: string;
-  notes: string;
 }
 
 type Feedback = { type: "success" | "error"; text: string } | null;
 
 function todayStr(): string {
   return new Date().toISOString().split("T")[0];
+}
+
+function calculateStats(reservations: Reservation[]): Stats {
+  const today = todayStr();
+  const todayActive = reservations.filter(
+    (r) => r.reservation_date === today && r.status !== "cancelled"
+  );
+  const totalToday = todayActive.length;
+  const totalPeople = todayActive.reduce((sum, r) => sum + r.party_size, 0);
+  const reservedTableIds = todayActive
+    .filter((r) => r.status === "pending" || r.status === "confirmed")
+    .map((r) => r.table_id);
+  const freeTables = 15 - new Set(reservedTableIds).size;
+  return { totalToday, freeTables, totalPeople };
 }
 
 export function AdminReservationPanel() {
@@ -59,23 +71,30 @@ export function AdminReservationPanel() {
     customer_name: "",
     customer_phone: "",
     customer_email: "",
-    notes: "",
   });
 
   const fetchData = async () => {
     try {
-      const res = await fetch("/api/reservations");
+      const res = await fetch(`/api/reservations?t=${Date.now()}`);
       if (!res.ok) return;
       const data = await res.json();
       setReservations(data.reservations);
       setStats(data.stats);
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error("Error fetching reservations:", err);
     }
   };
 
   useEffect(() => {
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible") fetchData();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
   }, []);
 
   useEffect(() => {
@@ -129,10 +148,26 @@ export function AdminReservationPanel() {
           customer_name: "",
           customer_phone: "",
           customer_email: "",
-          notes: "",
         });
-        await fetchData();
+        const newReservation: Reservation = {
+          id: data.id,
+          table_id: 0,
+          customer_name: form.customer_name,
+          customer_phone: form.customer_phone || null,
+          customer_email: form.customer_email || null,
+          party_size: form.party_size,
+          reservation_date: form.reservation_date,
+          reservation_time: form.reservation_time,
+          status: "confirmed",
+          created_at: new Date().toISOString(),
+          table_number: data.table,
+          capacity: 0,
+        };
+        const updated = [newReservation, ...reservations];
+        setReservations(updated);
+        setStats(calculateStats(updated));
         setFeedback({ type: "success", text: `Reserva creada — Mesa ${data.table}` });
+        fetchData();
       } else {
         const msg = typeof data.error === "object" ? "Revisa los campos del formulario." : data.error;
         setFeedback({ type: "error", text: msg });
@@ -144,18 +179,25 @@ export function AdminReservationPanel() {
   };
 
   const handleCancel = async (id: number) => {
+    const updated = reservations.map((r) =>
+      r.id === id ? { ...r, status: "cancelled" } : r
+    );
+    setReservations(updated);
+    setStats(calculateStats(updated));
+    setFeedback({ type: "success", text: "Reserva cancelada" });
     try {
       const res = await fetch("/api/reservations", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, status: "cancelled" }),
       });
-      if (res.ok) {
-        await fetchData();
-        setFeedback({ type: "success", text: "Reserva cancelada" });
+      if (!res.ok) {
+        setFeedback({ type: "error", text: "Error al cancelar." });
+        fetchData();
       }
     } catch {
-      setFeedback({ type: "error", text: "Error al cancelar." });
+      setFeedback({ type: "error", text: "Error de conexión." });
+      fetchData();
     }
   };
 
@@ -402,20 +444,6 @@ export function AdminReservationPanel() {
                 onChange={(e) => update("customer_email", e.target.value)}
                 error={errors.customer_email}
               />
-              <div className="flex flex-col gap-1 py-2 w-full">
-                <label htmlFor="notes" className="text-primary font-bold text-sm">
-                  Notas
-                </label>
-                <textarea
-                  id="notes"
-                  rows={2}
-                  value={form.notes}
-                  onChange={(e) => update("notes", e.target.value)}
-                  className="text-primary bg-elevated border border-muted/40 rounded-sm p-2 outline-none focus:border-primary/80 transition-colors scheme-dark text-sm"
-                  placeholder="Alergias, ocasión especial..."
-                />
-              </div>
-
               <button
                 type="submit"
                 disabled={loading}
