@@ -113,6 +113,18 @@ export async function deleteDish(dishId:number) {
     })
 }
 
+export async function completeOldReservations(): Promise<void> {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().split("T")[0];
+  await client.execute({
+    sql: `UPDATE reservations SET status = 'completed'
+          WHERE reservation_date <= ?
+          AND status IN ('pending', 'confirmed')`,
+    args: [yesterdayStr],
+  });
+}
+
 export async function getUpcomingReservations(): Promise<
   (Reservation & { table_number: number; capacity: number })[]
 > {

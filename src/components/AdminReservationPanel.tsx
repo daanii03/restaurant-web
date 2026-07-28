@@ -38,7 +38,11 @@ export function AdminReservationPanel() {
       const res = await fetch(`/api/reservations?t=${Date.now()}`);
       if (!res.ok) return;
       const data = await res.json();
-      setReservations(data.reservations);
+      const today = todayStr();
+      const filtered = (data.reservations as Reservation[]).filter(
+        (r) => r.reservation_date >= today
+      );
+      setReservations(filtered);
       setStats(data.stats);
     } catch (err) {
       console.error("Error fetching reservations:", err);
@@ -47,6 +51,8 @@ export function AdminReservationPanel() {
 
   useEffect(() => {
     fetchData();
+    const interval = setInterval(fetchData, 5 * 60 * 1000);
+    return () => clearInterval(interval);
   }, [fetchData]);
 
   useEffect(() => {

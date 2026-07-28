@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { getUpcomingReservations, createReservation, getAvailableTables, updateReservationStatus } from "@db/queries";
+import { getUpcomingReservations, createReservation, getAvailableTables, updateReservationStatus, completeOldReservations } from "@db/queries";
 import { verifySession } from "@utils/auth";
 
 const phoneRegex = /^(\+34)?[679]\d{8}$/;
@@ -23,6 +23,7 @@ export const GET: APIRoute = async ({ cookies }) => {
   }
 
   try {
+    await completeOldReservations();
     const reservations = await getUpcomingReservations();
     const today = new Date().toISOString().split("T")[0];
     const todayReservations = reservations.filter((r) => r.reservation_date === today && r.status !== "cancelled");
