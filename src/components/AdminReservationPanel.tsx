@@ -297,66 +297,122 @@ export function AdminReservationPanel() {
           {reservations.length === 0 ? (
             <p className="text-primary/60 italic">No hay próximas reservas.</p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-primary">
-                <thead>
-                  <tr className="border-b border-muted/20 text-sm uppercase tracking-wider text-primary/60">
-                    <th className="p-3">Día</th>
-                    <th className="p-3">Hora</th>
-                    <th className="p-3">Nombre</th>
-                    <th className="p-3 hidden sm:table-cell">Teléfono</th>
-                    <th className="p-3">Comensales</th>
-                    <th className="p-3">Mesa</th>
-                    <th className="p-3">Estado</th>
-                    <th className="p-3">Acción</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {reservations.map((r) => (
-                    <tr key={r.id} className="border-b border-muted/10 hover:bg-muted/10 transition-colors">
-                      <td className="p-3 text-sm">{new Date(r.reservation_date + "T12:00:00").toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short" })}</td>
-                      <td className="p-3 font-mono">{r.reservation_time}</td>
-                      <td className="p-3 font-medium">{r.customer_name}</td>
-                      <td className="p-3 hidden sm:table-cell">{r.customer_phone ?? "—"}</td>
-                      <td className="p-3">{r.party_size}</td>
-                      <td className="p-3">{r.table_number}</td>
-                      <td className="p-3">
-                        <span
-                          className={`text-xs font-bold px-2 py-1 rounded-sm ${
-                            r.status === "confirmed"
-                              ? "bg-green-900/40 text-green-400"
-                              : r.status === "pending"
-                                ? "bg-yellow-900/40 text-yellow-400"
-                                : r.status === "cancelled"
-                                  ? "bg-red-900/40 text-brand-red"
-                                  : "bg-blue-900/40 text-blue-400"
-                          }`}
-                        >
-                          {r.status === "confirmed"
-                            ? "Confirmada"
-                            : r.status === "pending"
-                              ? "Pendiente"
-                              : r.status === "cancelled"
-                                ? "Cancelada"
-                                : "Completada"}
-                        </span>
-                      </td>
-                      <td className="p-3">
-                        {(r.status === "pending" || r.status === "confirmed") && (
-                          <button
-                            type="button"
-                            onClick={() => handleCancel(r.id)}
-                            className="text-xs text-brand-red hover:text-white border border-brand-red hover:bg-brand-red px-2 py-1 rounded-sm transition-colors cursor-pointer"
-                          >
-                            Anular
-                          </button>
-                        )}
-                      </td>
+            <>
+              {/* Desktop table */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-left text-primary">
+                  <thead>
+                    <tr className="border-b border-muted/20 text-sm uppercase tracking-wider text-primary/60">
+                      <th className="p-3">Día</th>
+                      <th className="p-3">Hora</th>
+                      <th className="p-3">Nombre</th>
+                      <th className="p-3 hidden sm:table-cell">Teléfono</th>
+                      <th className="p-3">Comensales</th>
+                      <th className="p-3">Mesa</th>
+                      <th className="p-3">Estado</th>
+                      <th className="p-3">Acción</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {reservations.map((r) => (
+                      <tr key={r.id} className="border-b border-muted/10 hover:bg-muted/10 transition-colors">
+                        <td className="p-3 text-sm">{new Date(r.reservation_date + "T12:00:00").toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short" })}</td>
+                        <td className="p-3 font-mono">{r.reservation_time}</td>
+                        <td className="p-3 font-medium">{r.customer_name}</td>
+                        <td className="p-3 hidden sm:table-cell">{r.customer_phone ?? "—"}</td>
+                        <td className="p-3">{r.party_size}</td>
+                        <td className="p-3">{r.table_number}</td>
+                        <td className="p-3">
+                          <span
+                            className={`text-xs font-bold px-2 py-1 rounded-sm ${
+                              r.status === "confirmed"
+                                ? "bg-green-900/40 text-green-400"
+                                : r.status === "pending"
+                                  ? "bg-yellow-900/40 text-yellow-400"
+                                  : r.status === "cancelled"
+                                    ? "bg-red-900/40 text-brand-red"
+                                    : "bg-blue-900/40 text-blue-400"
+                            }`}
+                          >
+                            {r.status === "confirmed"
+                              ? "Confirmada"
+                              : r.status === "pending"
+                                ? "Pendiente"
+                                : r.status === "cancelled"
+                                  ? "Cancelada"
+                                  : "Completada"}
+                          </span>
+                        </td>
+                        <td className="p-3">
+                          {(r.status === "pending" || r.status === "confirmed") && (
+                            <button
+                              type="button"
+                              onClick={() => handleCancel(r.id)}
+                              className="text-xs text-brand-red hover:text-white border border-brand-red hover:bg-brand-red px-2 py-1 rounded-sm transition-colors cursor-pointer"
+                            >
+                              Anular
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile cards */}
+              <div className="block md:hidden space-y-3">
+                {reservations.map((r) => (
+                  <div key={r.id} className="bg-card border border-muted/20 rounded-sm p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <p className="text-primary font-medium text-base leading-tight">{r.customer_name}</p>
+                        <p className="text-primary/60 text-xs mt-0.5">
+                          {new Date(r.reservation_date + "T12:00:00").toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short" })}
+                          {" · "}
+                          <span className="font-mono">{r.reservation_time}</span>
+                        </p>
+                      </div>
+                      <span
+                        className={`shrink-0 text-xs font-bold px-2 py-1 rounded-sm ${
+                          r.status === "confirmed"
+                            ? "bg-green-900/40 text-green-400"
+                            : r.status === "pending"
+                              ? "bg-yellow-900/40 text-yellow-400"
+                              : r.status === "cancelled"
+                                ? "bg-red-900/40 text-brand-red"
+                                : "bg-blue-900/40 text-blue-400"
+                        }`}
+                      >
+                        {r.status === "confirmed"
+                          ? "Confirmada"
+                          : r.status === "pending"
+                            ? "Pendiente"
+                            : r.status === "cancelled"
+                              ? "Cancelada"
+                              : "Completada"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4 text-sm text-primary/80">
+                      <span>👥 {r.party_size} {r.party_size === 1 ? "comensal" : "comensales"}</span>
+                      <span>🪑 Mesa {r.table_number}</span>
+                      {r.customer_phone && <span className="text-primary/50 text-xs">📞 {r.customer_phone}</span>}
+                    </div>
+                    {(r.status === "pending" || r.status === "confirmed") && (
+                      <div className="mt-3 pt-3 border-t border-muted/10">
+                        <button
+                          type="button"
+                          onClick={() => handleCancel(r.id)}
+                          className="text-xs text-brand-red hover:text-white border border-brand-red hover:bg-brand-red px-3 py-1.5 rounded-sm transition-colors cursor-pointer"
+                        >
+                          Anular reserva
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       </section>
