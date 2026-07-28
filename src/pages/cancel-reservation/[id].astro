@@ -1,0 +1,154 @@
+---
+import Layout from "@layouts/Layout.astro";
+import crypto from "node:crypto";
+import { findReservationById } from "@db/queries";
+
+const { id } = Astro.params;
+const token = Astro.url.searchParams.get("token");
+
+let error: string | null = null;
+let reservation: Awaited<ReturnType<typeof findReservationById>> = null;
+
+if (!id || !token) {
+  error = "Faltan datos para cancelar la reserva.";
+} else {
+  const secret = import.meta.env.CANCEL_SECRET;
+  const expectedToken = crypto
+    .createHmac("sha256", secret)
+    .update(id)
+    .digest("hex");
+
+  if (token !== expectedToken) {
+    error = "El enlace de cancelación no es válido o ha expirado.";
+  } else {
+    reservation = await findReservationById(Number(id));
+
+    if (!reservation) {
+      error = "No se encontró la reserva.";
+    } else if (reservation.status === "cancelled") {
+      error = "Esta reserva ya está cancelada.";
+    } else if (reservation.status === "completed") {
+      error = "Esta reserva ya fue completada y no se puede cancelar.";
+    }
+  }
+}
+
+const statusLabels: Record<string, { label: string; class: string }> = {
+  pending: { label: "Pendiente", class: "bg-yellow-900/40 text-yellow-400" },
+  confirmed: { label: "Confirmada", class: "bg-green-900/40 text-green-400" },
+  cancelled: { label: "Cancelada", class: "bg-red-900/40 text-brand-red" },
+  completed: { label: "Completada", class: "bg-blue-900/40 text-blue-400" },
+};
+---
+
+<Layout title="Cancelar Reserva" justify="start">
+  <section class="flex flex-col gap-4 justify-center items-center w-full max-w-md mx-auto px-4 py-12">
+    <h1 class="text-3xl text-primary font-serif">Cancelar Reserva</h1>
+
+    {error ? (
+      <div class="bg-card p-6 rounded-sm text-center">
+        <div class="text-brand-red text-5xl mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01"/><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18"/></svg>
+        </div>
+        <p class="text-primary text-lg">{error}</p>
+        <a href="/" class="inline-block mt-6 text-accent-light hover:underline">Volver al inicio</a>
+      </div>
+    ) : reservation ? (
+      <div class="bg-card p-6 rounded-sm w-full">
+        <div class="text-center mb-6">
+          <div class="text-accent text-5xl mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0"/><path d="M9 12h6"/></svg>
+          </div>
+          <p class="text-primary/60 text-sm">Reserva #{reservation.id}</p>
+        </div>
+
+        <div class="bg-base rounded-sm p-4 space-y-3 text-primary">
+          <div class="flex justify-between">
+            <span class="text-primary/60">Cliente</span>
+            <span class="font-medium">{reservation.customer_name}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-primary/60">Fecha</span>
+            <span>{new Date(reservation.reservation_date + "T12:00:00").toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-primary/60">Hora</span>
+            <span class="font-mono">{reservation.reservation_time}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-primary/60">Comensales</span>
+            <span>{reservation.party_size}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-primary/60">Estado</span>
+            <span class={"text-xs font-bold px-2 py-1 rounded-sm " + (statusLabels[reservation.status]?.class ?? "")}>{statusLabels[reservation.status]?.label ?? reservation.status}</span>
+          </div>
+        </div>
+
+        <p class="text-primary/80 text-sm text-center mt-6 mb-4">
+          ¿Estás seguro de que quieres cancelar esta reserva?
+        </p>
+
+        <form id="cancel-form" class="flex flex-col gap-2">
+          <input type="hidden" name="id" value={reservation.id} />
+          <input type="hidden" name="token" value={token!} />
+          <button
+            type="submit"
+            class="w-full text-primary font-bold bg-transparent border border-brand-red hover:bg-brand-red disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-300 rounded-sm p-3 text-sm"
+          >
+            CANCELAR RESERVA
+          </button>
+        </form>
+
+        <div id="cancel-status" class="mt-4 text-center text-sm font-bold hidden"></div>
+
+        <a href="/" class="block text-center mt-4 text-accent-light hover:underline text-sm">Volver al inicio</a>
+      </div>
+    ) : null}
+  </section>
+</Layout>
+
+<script>
+  const form = document.getElementById("cancel-form") as HTMLFormElement | null;
+  const status = document.getElementById("cancel-status") as HTMLDivElement | null;
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!status) return;
+
+    const data = new FormData(form);
+    status.className = "mt-4 text-center text-sm font-bold";
+    status.textContent = "Cancelando...";
+    status.classList.remove("hidden");
+
+    try {
+      const res = await fetch("/api/reservations/cancel-by-token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: Number(data.get("id")),
+          token: data.get("token"),
+        }),
+      });
+
+      const json = await res.json();
+
+      if (res.ok) {
+        status.className = "mt-4 text-center text-sm font-bold text-green-400";
+        status.textContent = "Reserva cancelada con éxito.";
+
+        const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "CANCELADA";
+        }
+      } else {
+        status.className = "mt-4 text-center text-sm font-bold text-brand-red";
+        status.textContent = json.error || "Error al cancelar.";
+      }
+    } catch {
+      status.className = "mt-4 text-center text-sm font-bold text-brand-red";
+      status.textContent = "Error de conexión.";
+    }
+  });
+</script>
