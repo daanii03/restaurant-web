@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
 import { createReservation, getAvailableTables } from "@db/queries";
+import { sendEmail } from "@utils/email";
 
 const createSchema = z.object({
   customer_name: z.string().min(1, "El nombre es obligatorio."),
@@ -9,7 +10,6 @@ const createSchema = z.object({
   reservation_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha inválida."),
   reservation_time: z.string().regex(/^\d{2}:\d{2}$/, "Hora inválida."),
   customer_email: z.string().email("Email inválido.").optional().or(z.literal("")),
-  notes: z.string().optional(),
 });
 
 export const POST: APIRoute = async ({ request }) => {
@@ -51,6 +51,18 @@ export const POST: APIRoute = async ({ request }) => {
 
     const table = suitableTables[0];
     const id = await createReservation({ ...result.data, table_id: table.id });
+
+    if (result.data.customer_email) {
+      sendEmail({
+        to: result.data.customer_email,
+        customerName: result.data.customer_name,
+        date: result.data.reservation_date,
+        time: result.data.reservation_time,
+        partySize: result.data.party_size,
+        reservationId: id,
+      }).catch((err) => console.error("Error al enviar email:", err));
+    }
+
     return new Response(JSON.stringify({ success: true, id, table: table.number }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
