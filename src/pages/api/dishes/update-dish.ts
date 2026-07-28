@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
 import client from "@db/client";
+import { verifySession } from "@utils/auth";
 
 function slugify(text: string): string {
   return text
@@ -14,19 +15,19 @@ function slugify(text: string): string {
 
 const updateDishSchema = z.object({
   id: z.coerce.number().positive(),
-  name: z.string().min(1, "El nombre es obligatorio."),
+  name: z.string().min(1, "El nombre es obligatorio.").max(100, "Máximo 100 caracteres."),
   price: z.coerce
-    .number({ invalid_type_error: "El precio debe ser un número." })
+    .number("El precio debe ser un número.")
     .positive("El precio debe ser mayor que 0.")
     .multipleOf(0.01, "El precio puede tener como máximo dos decimales."),
   category_id: z.coerce.number(),
-  description: z.string().default(""),
+  description: z.string().max(500, "Máximo 500 caracteres.").default(""),
   allergens: z.array(z.coerce.number()).default([]),
   allergens_without: z.array(z.coerce.number()).default([]),
 });
 
 export const POST: APIRoute = async ({ request, cookies }) => {
-  if (!cookies.has("admin_session")) {
+  if (!verifySession(cookies.get("admin_session")?.value)) {
     return new Response(JSON.stringify({ error: "No tienes permiso." }), {
       status: 403,
       headers: { "Content-Type": "application/json" },

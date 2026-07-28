@@ -1,13 +1,14 @@
 import type { APIRoute } from "astro";
 import { z } from "zod"
 import { deleteDish } from "@db/queries";
+import { verifySession } from "@utils/auth";
 
 const deleteDishSchema = z.object({
     dish_id: z.coerce.number().int().positive()
 })
 
 export const POST: APIRoute = async ({request, redirect ,cookies}) =>{
-    if (!cookies.has("admin_session")) return new Response("No tienes permiso.", {status: 403});
+    if (!verifySession(cookies.get("admin_session")?.value)) return new Response("No tienes permiso.", {status: 403});
     try {
         const formData = await request.formData();
         const data = Object.fromEntries(formData);
