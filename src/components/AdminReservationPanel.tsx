@@ -23,6 +23,10 @@ function calculateStats(reservations: Reservation[]): Stats {
   return { totalToday, freeTables, totalPeople };
 }
 
+function Skeleton({ className }: { className?: string }) {
+  return <div className={`bg-muted/20 rounded-sm animate-pulse ${className ?? ""}`} />;
+}
+
 export function AdminReservationPanel() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [stats, setStats] = useState<Stats>({
@@ -30,6 +34,7 @@ export function AdminReservationPanel() {
     freeTables: 15,
     totalPeople: 0,
   });
+  const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [feedback, setFeedback] = useState<Feedback>(null);
 
@@ -44,8 +49,10 @@ export function AdminReservationPanel() {
       );
       setReservations(filtered);
       setStats(data.stats);
+      setLoading(false);
     } catch (err) {
       console.error("Error fetching reservations:", err);
+      setLoading(false);
     }
   }, []);
 
@@ -122,11 +129,26 @@ export function AdminReservationPanel() {
       )}
 
       <section className="mt-8 flex flex-col">
-        <StatsCards stats={stats} />
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 px-4 gap-4">
+            <Skeleton className="h-32" />
+            <Skeleton className="h-32" />
+            <Skeleton className="h-32" />
+          </div>
+        ) : (
+          <StatsCards stats={stats} />
+        )}
 
         <div className="px-4 mt-8">
           <h2 className="text-primary font-serif text-2xl mb-4">Próximas Reservas</h2>
-          {reservations.length === 0 ? (
+          {loading ? (
+            <div className="space-y-3">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          ) : reservations.length === 0 ? (
             <p className="text-primary/60 italic">No hay próximas reservas.</p>
           ) : (
             <>
