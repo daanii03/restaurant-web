@@ -56,6 +56,5 @@ export interface Reservation {
   reservation_date: string;
   reservation_time: string;
   status: ReservationStatus;
-  notes: string | null;
   created_at: string;
 }

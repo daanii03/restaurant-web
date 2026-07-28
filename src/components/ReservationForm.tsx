@@ -10,7 +10,6 @@ export function ReservationForm() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [notes, setNotes] = useState("");
   const [status, setStatus] = useState<{
     type: "idle" | "loading" | "success" | "error";
     text: string;
@@ -32,7 +31,6 @@ export function ReservationForm() {
           customer_name: name,
           customer_phone: phone,
           customer_email: email || undefined,
-          notes: notes || undefined,
         }),
       });
       const data = await res.json();
@@ -48,7 +46,6 @@ export function ReservationForm() {
         setName("");
         setPhone("");
         setEmail("");
-        setNotes("");
       } else {
         const msg =
           typeof data.error === "object"
@@ -126,19 +123,6 @@ export function ReservationForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <div className="flex flex-col gap-1 py-2 w-full">
-          <label htmlFor="public-notes" className="text-primary font-bold text-sm">
-            Notas
-          </label>
-          <textarea
-            id="public-notes"
-            rows={2}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            className="text-primary bg-elevated border border-muted/40 rounded-sm p-2 outline-none focus:border-primary/80 transition-colors scheme-dark text-sm"
-            placeholder="Alergias, ocasión especial..."
-          />
-        </div>
         <button
           type="submit"
           disabled={status.type === "loading"}

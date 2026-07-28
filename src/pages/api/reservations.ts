@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
 import { getUpcomingReservations, createReservation, getAvailableTables, updateReservationStatus } from "@db/queries";
+import { verifySession } from "@utils/auth";
 
 const phoneRegex = /^(\+34)?[679]\d{8}$/;
 
@@ -11,11 +12,10 @@ const createSchema = z.object({
   party_size: z.coerce.number().int().positive("El número de comensales debe ser mayor que 0."),
   reservation_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha inválida."),
   reservation_time: z.string().regex(/^\d{2}:\d{2}$/, "Hora inválida."),
-  notes: z.string().optional(),
 });
 
 export const GET: APIRoute = async ({ cookies }) => {
-  if (!cookies.has("admin_session")) {
+  if (!verifySession(cookies.get("admin_session")?.value)) {
     return new Response(JSON.stringify({ error: "No tienes permiso." }), {
       status: 403,
       headers: { "Content-Type": "application/json" },
@@ -25,7 +25,7 @@ export const GET: APIRoute = async ({ cookies }) => {
   try {
     const reservations = await getUpcomingReservations();
     const today = new Date().toISOString().split("T")[0];
-    const todayReservations = reservations.filter((r) => r.reservation_date === today);
+    const todayReservations = reservations.filter((r) => r.reservation_date === today && r.status !== "cancelled");
     const totalToday = todayReservations.length;
     const totalPeople = todayReservations.reduce((sum, r) => sum + r.party_size, 0);
     const totalTables = 15;
@@ -39,7 +39,7 @@ export const GET: APIRoute = async ({ cookies }) => {
         reservations,
         stats: { totalToday, freeTables, totalPeople },
       }),
-      { status: 200, headers: { "Content-Type": "application/json" } },
+      { status: 200, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } },
     );
   } catch (error) {
     console.error(error);
@@ -56,7 +56,7 @@ const statusSchema = z.object({
 });
 
 export const PATCH: APIRoute = async ({ request, cookies }) => {
-  if (!cookies.has("admin_session")) {
+  if (!verifySession(cookies.get("admin_session")?.value)) {
     return new Response(JSON.stringify({ error: "No tienes permiso." }), {
       status: 403,
       headers: { "Content-Type": "application/json" },
@@ -89,7 +89,7 @@ export const PATCH: APIRoute = async ({ request, cookies }) => {
 };
 
 export const POST: APIRoute = async ({ request, cookies }) => {
-  if (!cookies.has("admin_session")) {
+  if (!verifySession(cookies.get("admin_session")?.value)) {
     return new Response(JSON.stringify({ error: "No tienes permiso." }), {
       status: 403,
       headers: { "Content-Type": "application/json" },

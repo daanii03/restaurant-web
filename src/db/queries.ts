@@ -143,12 +143,11 @@ export async function createReservation(data: {
   party_size: number;
   reservation_date: string;
   reservation_time: string;
-  notes?: string;
   status?: ReservationStatus;
 }): Promise<number> {
   const result = await client.execute({
-    sql: `INSERT INTO reservations (table_id, customer_name, customer_phone, customer_email, party_size, reservation_date, reservation_time, notes, status)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    sql: `INSERT INTO reservations (table_id, customer_name, customer_phone, customer_email, party_size, reservation_date, reservation_time, status)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
       data.table_id,
       data.customer_name,
@@ -157,7 +156,6 @@ export async function createReservation(data: {
       data.party_size,
       data.reservation_date,
       data.reservation_time,
-      data.notes ?? null,
       data.status ?? "confirmed",
     ],
   });
@@ -204,6 +202,27 @@ export async function updateReservationStatus(id: number, status: ReservationSta
   });
 }
 
+export async function findReservationById(id: number): Promise<Reservation | null> {
+  const result = await client.execute({
+    sql: "SELECT * FROM reservations WHERE id = ?",
+    args: [id],
+  });
+  if (!result.rows[0]) return null;
+  const row = result.rows[0];
+  return {
+    id: Number(row.id),
+    table_id: Number(row.table_id),
+    customer_name: String(row.customer_name),
+    customer_phone: row.customer_phone as string | null,
+    customer_email: row.customer_email as string | null,
+    party_size: Number(row.party_size),
+    reservation_date: String(row.reservation_date),
+    reservation_time: String(row.reservation_time),
+    status: row.status as ReservationStatus,
+    created_at: String(row.created_at),
+  };
+}
+
 export async function findReservationByPhone(id: number, phone: string): Promise<Reservation | null> {
   const result = await client.execute({
     sql: "SELECT * FROM reservations WHERE id = ? AND customer_phone = ?",
@@ -221,7 +240,6 @@ export async function findReservationByPhone(id: number, phone: string): Promise
     reservation_date: String(row.reservation_date),
     reservation_time: String(row.reservation_time),
     status: row.status as ReservationStatus,
-    notes: row.notes as string | null,
     created_at: String(row.created_at),
   };
 }
