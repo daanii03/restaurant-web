@@ -20,6 +20,7 @@ const allergens = showAllergens ? await getAllergens() : [];
       class="text-primary data-active:text-accent-light data-active:border-b data-active:border-b-accent-light cursor-pointer transition-colors duration-200"
       data-active
       data-filter-category="all"
+      aria-label="Mostrar todas las categorías"
     >
       Todos
     </button>
@@ -28,6 +29,7 @@ const allergens = showAllergens ? await getAllergens() : [];
         <button
           class="text-primary data-active:text-accent-light data-active:border-b data-active:border-b-accent-light cursor-pointer transition-colors duration-200"
           data-filter-category={category.name}
+          aria-label={`Filtrar por categoría: ${category.name}`}
         >
           {category.name}
         </button>

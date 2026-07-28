@@ -13,7 +13,7 @@ const dishes = await getDishesWithAllergens();
 const categories = [...new Set(dishes.map((d) => d.category_name))];
 ---
 
-<Layout title="Tu Restaurante - Menu" justify="start">
+<Layout title="Carta" description="Descubre nuestra carta: hamburguesas gourmet, carnes maduradas, entrantes y postres caseros en Tu Restaurante, Tu Ciudad." justify="start">
   <Filter />
   <div class="px-4 py-5">
     <p

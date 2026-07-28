@@ -2,6 +2,24 @@
 
 ---
 
-<footer class="grid grid-cols-2 bg-elevated">
-  <h2 class="text-primary font-serif p-4">Tu Restaurante</h2>
+<footer class="grid grid-cols-1 sm:grid-cols-3 gap-6 bg-elevated p-6 text-primary" role="contentinfo">
+  <div>
+    <h2 class="font-serif text-lg mb-2">Tu Restaurante</h2>
+    <p class="text-sm text-primary/60">Restaurante en Tu Ciudad, Tu Región.</p>
+  </div>
+  <div>
+    <h3 class="font-bold text-sm mb-2">Contacto</h3>
+    <p class="text-sm text-primary/60">Calle de Tu Restaurante, 1</p>
+    <p class="text-sm text-primary/60">00000 Tu Ciudad, Tu Región</p>
+    <a href="tel:+34600000000" class="text-sm text-accent-light hover:underline">+34 600 00 00 00</a>
+  </div>
+  <div>
+    <h3 class="font-bold text-sm mb-2">Horario</h3>
+    <p class="text-sm text-primary/60">Lunes: Cerrado</p>
+    <p class="text-sm text-primary/60">Martes-Jueves: 7:30-16:00</p>
+    <p class="text-sm text-primary/60">Viernes-Domingo: 7:30-16:00 | 20:00-23:30</p>
+  </div>
+  <div class="sm:col-span-3 text-center text-xs text-primary/40 pt-4 border-t border-muted/20">
+    &copy; {new Date().getFullYear()} Tu Restaurante. Todos los derechos reservados.
+  </div>
 </footer>
