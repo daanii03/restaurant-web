@@ -57,8 +57,12 @@ export async function generateDataJson(dataDir?: string) {
     icon: null,
   }));
 
-  fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, "dishes.json"), JSON.stringify(dishes, null, 2));
-  fs.writeFileSync(path.join(dir, "categories.json"), JSON.stringify(categories, null, 2));
-  fs.writeFileSync(path.join(dir, "allergens.json"), JSON.stringify(allergens, null, 2));
+  try {
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, "dishes.json"), JSON.stringify(dishes, null, 2));
+    fs.writeFileSync(path.join(dir, "categories.json"), JSON.stringify(categories, null, 2));
+    fs.writeFileSync(path.join(dir, "allergens.json"), JSON.stringify(allergens, null, 2));
+  } catch (err) {
+    console.warn("No se pudieron escribir los JSON:", err);
+  }
 }
