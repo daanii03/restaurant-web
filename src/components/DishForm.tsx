@@ -70,8 +70,9 @@ export function DishForm({
         });
 
         if (isEdit) {
-          await new Promise((r) => setTimeout(r, 2000));
-          window.location.href = "/admin/dashboard";
+          setTimeout(() => {
+            window.location.href = "/admin/dashboard";
+          }, 2000);
           return;
         }
       } else {
