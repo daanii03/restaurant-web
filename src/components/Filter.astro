@@ -1,15 +1,12 @@
 ---
 import categoriesData from "@data/categories.json";
-import allAllergensData from "@data/allergens.json";
 
 export interface Props {
   class?: string;
-  showAllergens?: boolean;
 }
 
-const { class: className = "", showAllergens = true } = Astro.props;
+const { class: className = "" } = Astro.props;
 const categories = categoriesData as { id: number; name: string; order: number }[];
-const allergens = showAllergens ? (allAllergensData as { id: number; name: string; icon: string | null }[]) : [];
 
 ---
 
@@ -37,31 +34,11 @@ const allergens = showAllergens ? (allAllergensData as { id: number; name: strin
       ))
     }
   </div>
-
-  {
-    showAllergens && (
-      <div
-        class="border-b border-b-muted/40 flex flex-row flex-wrap gap-2 py-3 px-4 justify-center md:gap-4 md:py-4 md:px-0"
-      >
-        {
-          allergens.map((allergen) => (
-            <button
-              class="text-primary data-active:text-accent-light data-active:border-b data-active:border-b-accent-light cursor-pointer transition-colors duration-200"
-              data-filter-allergen={allergen.name}
-            >
-              Sin {allergen.name}
-            </button>
-          ))
-        }
-      </div>
-    )
-  }
 </nav>
 
 <script>
   function initFilters() {
     const categoryBtns = document.querySelectorAll("[data-filter-category]");
-    const allergenBtns = document.querySelectorAll("[data-filter-allergen]");
     const dishes = document.querySelectorAll<HTMLElement>(
       ".bg-card[data-category]",
     );
@@ -69,25 +46,15 @@ const allergens = showAllergens ? (allAllergensData as { id: number; name: strin
     const noResults = document.getElementById("no-results");
 
     let activeCategory: string | null = null;
-    const excludedAllergens = new Set<string>();
     let isAnimating = false;
 
     function applyFilters() {
       dishes.forEach((dish) => {
         const dishCategory = dish.dataset.category;
-        const dishAllergens =
-          dish.dataset.allergens?.split(",").map((a) => a.trim()) ?? [];
-        const dishAllergensWithout =
-          dish.dataset.allergensWithout?.split(",").map((a) => a.trim()).filter(Boolean) ?? [];
-
         const matchCategory =
           !activeCategory || dishCategory === activeCategory;
-        const matchAllergen = !dishAllergens.some((a) =>
-          excludedAllergens.has(a) && !dishAllergensWithout.includes(a),
-        );
-        const shouldShow = matchCategory && matchAllergen;
 
-        if (shouldShow) {
+        if (matchCategory) {
           dish.removeAttribute("data-hidden");
         } else {
           dish.setAttribute("data-hidden", "");
@@ -146,25 +113,6 @@ const allergens = showAllergens ? (allAllergensData as { id: number; name: strin
         triggerFilterAnimation();
       });
     });
-
-    if (allergenBtns.length > 0) {
-      allergenBtns.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const el = btn as HTMLElement;
-          const allergen = el.dataset.filterAllergen!;
-
-          if (excludedAllergens.has(allergen)) {
-            excludedAllergens.delete(allergen);
-            el.removeAttribute("data-active");
-          } else {
-            excludedAllergens.add(allergen);
-            el.setAttribute("data-active", "");
-          }
-
-          triggerFilterAnimation();
-        });
-      });
-    }
   }
 
   document.addEventListener("DOMContentLoaded", initFilters);
