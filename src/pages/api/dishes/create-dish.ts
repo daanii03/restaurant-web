@@ -22,6 +22,7 @@ const createDishSchema = z.object({
     .multipleOf(0.01, "El precio puede tener como máximo dos decimales."),
   category_id: z.coerce.number(),
   description: z.string().max(500, "Máximo 500 caracteres.").default(""),
+  image: z.string().max(200).default(""),
   allergens: z.array(z.coerce.number()).default([]),
   allergens_without: z.array(z.coerce.number()).default([]),
 });
@@ -42,6 +43,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       price: formData.get("price"),
       category_id: formData.get("category_id"),
       description: formData.get("description"),
+      image: formData.get("image"),
       allergens: formData.getAll("allergens"),
       allergens_without: formData.getAll("allergens_without"),
     };
@@ -60,6 +62,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       price,
       category_id,
       description,
+      image,
       allergens,
       allergens_without,
     } = result.data;
@@ -67,8 +70,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     const slug = slugify(name);
 
     const insertResult = await client.execute({
-      sql: `INSERT INTO dishes (name, slug, price, category_id, description) VALUES (?, ?, ?, ?, ?)`,
-      args: [name, slug, price, category_id, description],
+      sql: `INSERT INTO dishes (name, slug, price, category_id, description, image) VALUES (?, ?, ?, ?, ?, ?)`,
+      args: [name, slug, price, category_id, description, image],
     });
 
     const dishId = Number(insertResult.lastInsertRowid);

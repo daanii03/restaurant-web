@@ -6,6 +6,7 @@ interface DishData {
   name: string;
   price: number;
   description: string;
+  image: string;
   category_id: number;
   allergens: number[];
   allergens_without: number[];
@@ -28,6 +29,7 @@ const emptyDish: DishData = {
   name: "",
   price: 0,
   description: "",
+  image: "",
   category_id: 0,
   allergens: [],
   allergens_without: [],
@@ -123,6 +125,15 @@ export function DishForm({
           ))}
         </select>
       </div>
+
+      <Input
+        id="image"
+        name="image"
+        labelText="Nombre del archivo de imagen"
+        type="text"
+        defaultValue={initial.image}
+        placeholder="ej: hamburguesa.webp"
+      />
 
       <div className="flex flex-col gap-2 py-4 w-full">
         <label htmlFor="description" className="text-primary font-bold">
