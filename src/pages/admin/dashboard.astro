@@ -2,25 +2,12 @@
 import LayoutDashboard from "@layouts/LayoutDashboard.astro";
 import FilterAdmin from "@components/Filter.astro";
 import DishCardAdmin from "@components/AdminDishCard.astro";
-import dishes from "@data/dishes.json";
+import { getDishesWithAllergens } from "@db/queries";
 import { verifySession } from "@utils/auth";
 
 if (!verifySession(Astro.cookies.get("admin_session")?.value)) return Astro.redirect("/admin");
 
-type DishAllergen = { id: number; name: string; without_option: number };
-type AdminDish = {
-  id: number;
-  name: string;
-  description: string | null;
-  price: number;
-  image: string | null;
-  category_id: number;
-  slug: string;
-  category_name: string;
-  allergens: DishAllergen[];
-};
-
-const dishesData = dishes as AdminDish[];
+const dishesData = await getDishesWithAllergens();
 ---
 
 <LayoutDashboard title="Dashboard - Tu Restaurante" pageTitle="Gestión de la Carta">
