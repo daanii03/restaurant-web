@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { z } from "zod";
 import client from "@db/client";
 import { verifySession } from "@utils/auth";
+import { generateDataJson } from "@db/generate-json";
 
 function slugify(text: string): string {
   return text
@@ -81,6 +82,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         });
       }
     }
+
+    await generateDataJson();
 
     return new Response(JSON.stringify({ success: true, id: dishId }), {
       status: 200,
