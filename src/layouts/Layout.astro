@@ -16,6 +16,38 @@ import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import MobileNav from "@components/MobileNav.astro";
 
+import hoursConfig from "@data/hours.json";
+type HoursData = Record<string, { closed?: boolean; slots?: string[][] }>;
+const hoursData = hoursConfig as HoursData;
+
+const DAY_NAMES_EN: Record<string, string[]> = {
+  "0": ["Sunday"],
+  "1": ["Monday"],
+  "2": ["Tuesday"],
+  "3": ["Wednesday"],
+  "4": ["Thursday"],
+  "5": ["Friday"],
+  "6": ["Saturday"],
+};
+
+function toSeoHours() {
+  const specs: { "@type": string; dayOfWeek: string[]; opens: string; closes: string }[] = [];
+  for (const [day, cfg] of Object.entries(hoursData)) {
+    if (cfg.closed || !cfg.slots) continue;
+    const dayNames = DAY_NAMES_EN[day];
+    if (!dayNames) continue;
+    for (const [open, close] of cfg.slots) {
+      specs.push({
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: dayNames,
+        opens: open,
+        closes: close,
+      });
+    }
+  }
+  return specs;
+}
+
 const siteUrl = import.meta.env.PUBLIC_SITE_URL ?? "http://localhost:4321";
 const fullTitle = title === "Tu Restaurante" ? title : `${title} | Tu Restaurante`;
 ---
@@ -60,11 +92,7 @@ const fullTitle = title === "Tu Restaurante" ? title : `${title} | Tu Restaurant
         postalCode: "00000",
         addressCountry: "ES",
       },
-      openingHoursSpecification: [
-        { "@type": "OpeningHoursSpecification", dayOfWeek: ["Tuesday", "Wednesday", "Thursday"], opens: "07:30", closes: "16:00" },
-        { "@type": "OpeningHoursSpecification", dayOfWeek: ["Friday", "Saturday", "Sunday"], opens: "07:30", closes: "16:00" },
-        { "@type": "OpeningHoursSpecification", dayOfWeek: ["Friday", "Saturday", "Sunday"], opens: "20:00", closes: "23:30" },
-      ],
+      openingHoursSpecification: toSeoHours(),
     })} />
   </head>
   <body class="font-sans flex flex-col min-h-screen bg-base">

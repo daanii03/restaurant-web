@@ -3,9 +3,30 @@ import Layout from "@layouts/Layout.astro";
 import map from "@assets/anover-tajo.webp";
 import { Image } from "astro:assets";
 import { ReservationForm } from "@components/ReservationForm";
+import hoursConfig from "@data/hours.json";
+
+type HoursData = Record<string, { closed?: boolean; slots?: string[][] }>;
+const hours = hoursConfig as HoursData;
+
+const DAY_NAMES: Record<string, string> = {
+  "0": "Domingo",
+  "1": "Lunes",
+  "2": "Martes",
+  "3": "Miércoles",
+  "4": "Jueves",
+  "5": "Viernes",
+  "6": "Sábado",
+};
+
+function formatHours(h: HoursData[string]): string {
+  if (h?.closed) return "Cerrado";
+  if (!h?.slots || h.slots.length === 0) return "Cerrado";
+  return h.slots.map((s) => `${s[0].replace(/^0/, "")}-${s[1].replace(/^0/, "")}`).join(" | ");
+}
 ---
 
 <Layout title="Reservas" description="Reserva tu mesa en Tu Restaurante, Tu Ciudad. Elige fecha, hora y número de comensales." justify="center">
+  <script set:html={`window.__HOURS_CONFIG = ${JSON.stringify(hoursConfig)};`} />
   <section class="flex flex-col gap-4 justify-center items-center">
     <h1 class="text-4xl text-primary font-serif pt-4">Haz tu Reserva</h1>
     <p class="text-primary/60 text-sm -mt-2">Te enviaremos un email de confirmación con un enlace para cancelar tu reserva si es necesario.</p>
@@ -70,24 +91,14 @@ import { ReservationForm } from "@components/ReservationForm";
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="icon icon-tabler icons-tabler-outline icon-tabler-clock" viewBox="0 0 24 24"><path fill="none" stroke="none" d="M0 0h24v24H0z"/><path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/></svg>
               Horario
             </h3>
-            <div
-              class="flex flex-row justify-between border-b border-b-muted/20 pt-4 pb-2 w-full"
-            >
-              <p class="text-primary">Lunes</p>
-              <p class="text-primary">Cerrado</p>
-            </div>
-            <div
-              class="flex flex-row justify-between border-b border-b-muted/20 pt-4 pb-2 w-full"
-            >
-              <p class="text-primary">Martes-Jueves</p>
-              <p class="text-primary">7:30-16:00</p>
-            </div>
-            <div
-              class="flex flex-row justify-between border-b border-b-muted/20 pt-4 pb-2 w-full"
-            >
-              <p class="text-primary">Viernes-Domingo</p>
-              <p class="text-primary">7:30-16:00 | 20:00-23:30</p>
-            </div>
+            {
+              Object.entries(DAY_NAMES).map(([day, label]) => (
+                <div class="flex flex-row justify-between border-b border-b-muted/20 pt-4 pb-2 w-full">
+                  <p class="text-primary">{label}</p>
+                  <p class="text-primary">{formatHours(hours[day])}</p>
+                </div>
+              ))
+            }
           </div>
         </div>
       </div>

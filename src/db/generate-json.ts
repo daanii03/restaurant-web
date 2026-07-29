@@ -20,7 +20,7 @@ export async function generateDataJson(dataDir?: string) {
   });
   const dir = dataDir ?? path.resolve(process.cwd(), "src/data");
 
-  const [dishesResult, categoriesResult, allergensResult] = await Promise.all([
+  const [dishesResult, categoriesResult, allergensResult, settingsResult] = await Promise.all([
     client.execute(`
       SELECT 
         d.*, 
@@ -44,6 +44,7 @@ export async function generateDataJson(dataDir?: string) {
     `),
     client.execute(`SELECT * FROM categories ORDER BY "order"`),
     client.execute(`SELECT * FROM allergens`),
+    client.execute(`SELECT value FROM settings WHERE key = 'hours'`),
   ]);
 
   const dishes = dishesResult.rows.map((row) => ({
@@ -65,11 +66,17 @@ export async function generateDataJson(dataDir?: string) {
     icon: null,
   }));
 
+  const hoursRow = settingsResult.rows[0];
+  const hours = hoursRow ? JSON.parse(hoursRow.value as string) : null;
+
   try {
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(path.join(dir, "dishes.json"), JSON.stringify(dishes, null, 2));
     fs.writeFileSync(path.join(dir, "categories.json"), JSON.stringify(categories, null, 2));
     fs.writeFileSync(path.join(dir, "allergens.json"), JSON.stringify(allergens, null, 2));
+    if (hours) {
+      fs.writeFileSync(path.join(dir, "hours.json"), JSON.stringify(hours, null, 2));
+    }
   } catch (err) {
     console.warn("No se pudieron escribir los JSON:", err);
   }

@@ -44,6 +44,11 @@ export interface RestaurantTable {
   active: number;
 }
 
+export interface Setting {
+  key: string;
+  value: string;
+}
+
 export type ReservationStatus = "pending" | "confirmed" | "cancelled" | "completed";
 
 export interface Reservation {

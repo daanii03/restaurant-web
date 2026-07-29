@@ -1,5 +1,5 @@
 import client from "@db/client";
-import type { Category, Allergen, Dish, Reservation, ReservationStatus, RestaurantTable } from "@db/schema";
+import type { Category, Allergen, Dish, Reservation, ReservationStatus, RestaurantTable, Setting } from "@db/schema";
 
 export type DishFormData = {
     id:number;
@@ -254,4 +254,21 @@ export async function findReservationByPhone(id: number, phone: string): Promise
     status: row.status as ReservationStatus,
     created_at: String(row.created_at),
   };
+}
+
+export type HoursConfig = Record<string, { closed?: boolean; slots?: string[][] }>;
+
+export async function getHoursConfig(): Promise<HoursConfig | null> {
+  const result = await client.execute({
+    sql: "SELECT value FROM settings WHERE key = 'hours'",
+  });
+  if (!result.rows[0]) return null;
+  return JSON.parse(result.rows[0].value as string);
+}
+
+export async function updateHoursConfig(hours: HoursConfig): Promise<void> {
+  await client.execute({
+    sql: "INSERT OR REPLACE INTO settings (key, value) VALUES ('hours', ?)",
+    args: [JSON.stringify(hours)],
+  });
 }

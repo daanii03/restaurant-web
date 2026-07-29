@@ -12,8 +12,20 @@ const MONTHS = [
 
 const DAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
-function isMonday(date: Date) {
-  return date.getDay() === 1;
+function getHoursConfig() {
+  if (typeof window !== "undefined" && (window as any).__HOURS_CONFIG) {
+    return (window as any).__HOURS_CONFIG as Record<string, { closed?: boolean; slots?: string[][] }>;
+  }
+  return null;
+}
+
+function isClosedDay(date: Date) {
+  const config = getHoursConfig();
+  if (config) {
+    const dayConfig = config[String(date.getDay())];
+    return !dayConfig || dayConfig.closed || !dayConfig.slots || dayConfig.slots.length === 0;
+  }
+  return date.getDay() === 1; // fallback: Monday closed
 }
 
 function isPast(date: Date) {
@@ -24,7 +36,7 @@ function isPast(date: Date) {
 }
 
 function isDisabled(date: Date) {
-  return isMonday(date) || isPast(date);
+  return isClosedDay(date) || isPast(date);
 }
 
 function toDateStr(date: Date) {
@@ -131,10 +143,10 @@ export function Calendar({ value, onChange }: CalendarProps) {
           })}
         </div>
       </div>
-      {value && isMonday(new Date(value + "T12:00:00")) && (
-        <p className="text-brand-red text-[10px]">Los lunes estamos cerrados</p>
+      {value && isClosedDay(new Date(value + "T12:00:00")) && (
+        <p className="text-brand-red text-[10px]">Este día cerramos</p>
       )}
-      {value && !isMonday(new Date(value + "T12:00:00")) && (() => {
+      {value && !isClosedDay(new Date(value + "T12:00:00")) && (() => {
         const date = new Date(value + "T12:00:00");
         date.setHours(0, 0, 0, 0);
         if (date < today) return <p className="text-brand-red text-[10px]">La fecha no puede ser anterior a hoy</p>;

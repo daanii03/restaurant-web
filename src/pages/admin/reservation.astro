@@ -2,11 +2,15 @@
 import LayoutDashboard from "@layouts/LayoutDashboard.astro";
 import { AdminReservationPanel } from "@components/AdminReservationPanel";
 import { verifySession } from "@utils/auth";
+import { getHoursConfig } from "@db/queries";
 
 if (!verifySession(Astro.cookies.get("admin_session")?.value)) return Astro.redirect("/admin");
+
+const hoursConfig = await getHoursConfig();
 ---
 
 <LayoutDashboard title="Gestión Reservas - Tu Restaurante" pageTitle="Reservas">
+  <script set:html={`window.__HOURS_CONFIG = ${JSON.stringify(hoursConfig)};`} />
   <button
     slot="header-right"
     id="open-reservation-btn"

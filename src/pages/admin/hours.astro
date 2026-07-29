@@ -1,0 +1,157 @@
+---
+import LayoutDashboard from "@layouts/LayoutDashboard.astro";
+import { verifySession } from "@utils/auth";
+import { getHoursConfig } from "@db/queries";
+
+if (!verifySession(Astro.cookies.get("admin_session")?.value)) return Astro.redirect("/admin");
+
+const hours = await getHoursConfig();
+
+const DAY_NAMES: Record<string, string> = {
+  "0": "Domingo",
+  "1": "Lunes",
+  "2": "Martes",
+  "3": "Miércoles",
+  "4": "Jueves",
+  "5": "Viernes",
+  "6": "Sábado",
+};
+---
+
+<LayoutDashboard title="Horarios - Tu Restaurante" pageTitle="Configurar Horarios">
+  <section class="w-full max-w-2xl mx-auto px-4 py-5">
+    <p class="text-primary/60 text-sm mb-4">Si un día no tiene franjas horarias se considera cerrado.</p>
+    <form id="hours-form" class="flex flex-col gap-4">
+      {
+        Object.entries(DAY_NAMES).map(([day, label]) => {
+          const config = hours?.[day] ?? {};
+          const slots = config.closed ? [] : (config.slots ?? []);
+
+          return (
+            <div class="bg-card p-4 rounded-sm border border-muted/20">
+              <h3 class="text-primary font-bold text-lg mb-3">{label}</h3>
+              <div data-slots-container data-day={day}>
+                {slots.length === 0 ? (
+                  <p class="text-primary/40 text-sm italic">Cerrado</p>
+                ) : (
+                  slots.map((slot, i) => (
+                    <div class="flex items-center gap-2 mb-2">
+                      <input type="time" name={`hours-${day}-${i}-start`} value={slot[0]} class="bg-elevated border border-muted/40 rounded-sm p-2 text-primary text-sm" />
+                      <span class="text-primary">a</span>
+                      <input type="time" name={`hours-${day}-${i}-end`} value={slot[1]} class="bg-elevated border border-muted/40 rounded-sm p-2 text-primary text-sm" />
+                      <button type="button" data-remove-slot class="text-brand-red hover:text-red-400 transition-colors text-sm cursor-pointer">Eliminar</button>
+                    </div>
+                  ))
+                )}
+              </div>
+              <button type="button" data-add-slot data-day={day} class="text-accent-light text-sm mt-2 hover:text-accent transition-colors cursor-pointer">
+                + Añadir franja
+              </button>
+            </div>
+          );
+        })
+      }
+
+      <div id="form-status" class="hidden text-center font-bold p-3 rounded-sm border"></div>
+
+      <button type="submit" class="text-primary font-bold bg-transparent border border-brand-red hover:bg-brand-red cursor-pointer transition-all duration-300 rounded-sm p-4 w-full mt-4">
+        GUARDAR HORARIOS
+      </button>
+    </form>
+  </section>
+</LayoutDashboard>
+
+<script>
+  const form = document.getElementById("hours-form") as HTMLFormElement;
+  const statusEl = document.getElementById("form-status") as HTMLElement;
+
+  function setStatus(type: "success" | "error", text: string) {
+    statusEl.className = `text-center font-bold p-3 rounded-sm border transition-colors ${
+      type === "success"
+        ? "bg-green-900/40 text-green-400 border-green-500/50"
+        : "bg-red-900/40 text-brand-red border-brand-red/50"
+    }`;
+    statusEl.textContent = text;
+    statusEl.classList.remove("hidden");
+  }
+
+  document.querySelectorAll<HTMLButtonElement>("[data-add-slot]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const day = btn.dataset.day;
+      const container = document.querySelector<HTMLElement>(`[data-slots-container][data-day="${day}"]`);
+      if (!container) return;
+      const existing = container.querySelectorAll("input[type=time]");
+      const count = existing.length ? existing.length / 2 : 0;
+      const div = document.createElement("div");
+      div.className = "flex items-center gap-2 mb-2";
+      div.innerHTML = `
+        <input type="time" name="hours-${day}-${count}-start" value="07:30" class="bg-elevated border border-muted/40 rounded-sm p-2 text-primary text-sm" />
+        <span class="text-primary">a</span>
+        <input type="time" name="hours-${day}-${count}-end" value="16:00" class="bg-elevated border border-muted/40 rounded-sm p-2 text-primary text-sm" />
+        <button type="button" data-remove-slot class="text-brand-red hover:text-red-400 transition-colors text-sm cursor-pointer">Eliminar</button>
+      `;
+      container.appendChild(div);
+      addRemoveHandler(div.querySelector("[data-remove-slot]")!);
+      const cerrado = container.querySelector("p.text-primary\\/40");
+      if (cerrado) cerrado.remove();
+    });
+  });
+
+  function addRemoveHandler(btn: Element) {
+    btn.addEventListener("click", () => {
+      const container = btn.closest("[data-slots-container]");
+      btn.parentElement?.remove();
+      if (container && !container.querySelector(".flex.items-center.gap-2")) {
+        const p = document.createElement("p");
+        p.className = "text-primary/40 text-sm italic";
+        p.textContent = "Cerrado";
+        container.appendChild(p);
+      }
+    });
+  }
+
+  document.querySelectorAll("[data-remove-slot]").forEach(addRemoveHandler);
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const data: Record<string, { slots?: string[][] }> = {};
+
+    document.querySelectorAll<HTMLElement>("[data-slots-container]").forEach((container) => {
+      const day = container.dataset.day!;
+      const slots: string[][] = [];
+      container.querySelectorAll<HTMLInputElement>("input[type=time]").forEach((input) => {
+        const name = input.name;
+        const match = name.match(/hours-(\d+)-(\d+)-(start|end)/);
+        if (!match) return;
+        const slotIdx = parseInt(match[2]);
+        const type = match[3] as "start" | "end";
+        if (!slots[slotIdx]) slots[slotIdx] = ["", ""];
+        slots[slotIdx][type === "start" ? 0 : 1] = input.value;
+      });
+      const filtered = slots.filter((s) => s[0] && s[1]);
+      if (filtered.length > 0) {
+        data[day] = { slots: filtered };
+      }
+    });
+
+    try {
+      const response = await fetch("/api/settings/hours", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        setStatus("success", "Horarios guardados correctamente");
+        setTimeout(() => {
+          statusEl.classList.add("hidden");
+        }, 3000);
+      } else {
+        const err = await response.json();
+        setStatus("error", err.error || "Error al guardar los horarios");
+      }
+    } catch {
+      setStatus("error", "Error de conexión con el servidor.");
+    }
+  });
+</script>

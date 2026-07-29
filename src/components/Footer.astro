@@ -1,5 +1,23 @@
 ---
+import hoursConfig from "@data/hours.json";
 
+type HoursData = Record<string, { closed?: boolean; slots?: string[][] }>;
+const hours = hoursConfig as HoursData;
+
+const DAY_NAMES: Record<string, string> = {
+  "0": "Domingo",
+  "1": "Lunes",
+  "2": "Martes",
+  "3": "Miércoles",
+  "4": "Jueves",
+  "5": "Viernes",
+  "6": "Sábado",
+};
+
+function formatHours(h: HoursData[string]): string {
+  if (h?.closed || !h?.slots || h.slots.length === 0) return "Cerrado";
+  return h.slots.map((s) => `${s[0].replace(/^0/, "")}-${s[1].replace(/^0/, "")}`).join(" | ");
+}
 ---
 
 <footer class="grid grid-cols-1 sm:grid-cols-3 gap-6 bg-elevated p-6 text-primary" role="contentinfo">
@@ -15,9 +33,14 @@
   </div>
   <div>
     <h3 class="font-bold text-sm mb-2">Horario</h3>
-    <p class="text-sm text-primary/60">Lunes: Cerrado</p>
-    <p class="text-sm text-primary/60">Martes-Jueves: 7:30-16:00</p>
-    <p class="text-sm text-primary/60">Viernes-Domingo: 7:30-16:00 | 20:00-23:30</p>
+    {
+      Object.entries(DAY_NAMES).map(([day, label]) => (
+        <div class="flex flex-row justify-between gap-2 text-sm text-primary/60">
+          <span>{label}:</span>
+          <span class="text-right">{formatHours(hours[day])}</span>
+        </div>
+      ))
+    }
   </div>
   <div class="sm:col-span-3 text-center text-xs text-primary/40 pt-4 border-t border-muted/20">
     &copy; {new Date().getFullYear()} Tu Restaurante. Todos los derechos reservados.
