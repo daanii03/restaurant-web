@@ -65,7 +65,7 @@ export function ReservationForm() {
       </h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-1">
         <Calendar value={date} onChange={setDate} />
-        <div className="flex flex-col lg:flex-row gap-4">
+        <div className="flex flex-col xl:flex-row gap-4">
           <div className="flex flex-col gap-2 py-4 w-full">
             <label htmlFor="public-time" className="text-primary font-bold">
               Hora

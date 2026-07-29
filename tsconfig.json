@@ -29,11 +29,11 @@
       ],
       "@lib/*": [
         "./src/lib/*"
-      ]
-    },
-    "@data/*": [
+      ],
+      "@data/*": [
       "./src/data/*"
     ],
+    },
     "jsx": "react-jsx",
     "jsxImportSource": "react"
   }
