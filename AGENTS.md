@@ -8,6 +8,20 @@ astro dev --background
 
 Manage the background server with `astro dev stop`, `astro dev status`, and `astro dev logs`.
 
+## Tests
+
+Run tests with:
+
+```
+pnpm test
+```
+
+For watch mode:
+
+```
+pnpm test:watch
+```
+
 ## Documentation
 
 Full documentation: https://docs.astro.build

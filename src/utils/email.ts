@@ -4,7 +4,7 @@ import crypto from "node:crypto";
 const resend = new Resend(import.meta.env.RESEND_API_KEY);
 const CANCEL_SECRET = import.meta.env.CANCEL_SECRET;
 
-function escapeHtml(text: string): string {
+export function escapeHtml(text: string): string {
   return text
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
