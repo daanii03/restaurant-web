@@ -21,6 +21,44 @@ export async function getCategories(): Promise<Category[]> {
     }));
 }
 
+export async function createCategory(name: string, order: number): Promise<number> {
+  const result = await client.execute({
+    sql: "INSERT INTO categories (name, \"order\") VALUES (?, ?)",
+    args: [name, order],
+  });
+  return Number(result.lastInsertRowid);
+}
+
+export async function updateCategory(id: number, name: string, order: number): Promise<void> {
+  await client.execute({
+    sql: "UPDATE categories SET name = ?, \"order\" = ? WHERE id = ?",
+    args: [name, order, id],
+  });
+}
+
+export async function deleteCategory(id: number): Promise<void> {
+  await client.execute({ sql: "DELETE FROM categories WHERE id = ?", args: [id] });
+}
+
+export async function createAllergen(name: string): Promise<number> {
+  const result = await client.execute({
+    sql: "INSERT INTO allergens (name) VALUES (?)",
+    args: [name],
+  });
+  return Number(result.lastInsertRowid);
+}
+
+export async function updateAllergen(id: number, name: string): Promise<void> {
+  await client.execute({
+    sql: "UPDATE allergens SET name = ? WHERE id = ?",
+    args: [name, id],
+  });
+}
+
+export async function deleteAllergen(id: number): Promise<void> {
+  await client.execute({ sql: "DELETE FROM allergens WHERE id = ?", args: [id] });
+}
+
 export async function getDishesWithAllergens() {
     const result = await client.execute(`
       SELECT 
@@ -270,5 +308,80 @@ export async function updateHoursConfig(hours: HoursConfig): Promise<void> {
   await client.execute({
     sql: "INSERT OR REPLACE INTO settings (key, value) VALUES ('hours', ?)",
     args: [JSON.stringify(hours)],
+  });
+}
+
+// Table management
+
+export async function getAllTables(): Promise<RestaurantTable[]> {
+  const result = await client.execute("SELECT * FROM restaurant_tables ORDER BY number");
+  return result.rows.map(row => ({
+    id: Number(row.id),
+    number: Number(row.number),
+    capacity: Number(row.capacity),
+    zone: row.zone as string | null,
+    active: Number(row.active),
+  }));
+}
+
+export async function getActiveTableCount(): Promise<number> {
+  const result = await client.execute("SELECT COUNT(*) as count FROM restaurant_tables WHERE active = 1");
+  return Number(result.rows[0].count);
+}
+
+export async function createTable(data: { number: number; capacity: number; zone?: string }): Promise<number> {
+  const result = await client.execute({
+    sql: "INSERT INTO restaurant_tables (number, capacity, zone) VALUES (?, ?, ?)",
+    args: [data.number, data.capacity, data.zone ?? null],
+  });
+  return Number(result.lastInsertRowid);
+}
+
+export async function updateTable(id: number, data: { number?: number; capacity?: number; zone?: string | null; active?: number }): Promise<void> {
+  const fields: string[] = [];
+  const args: (string | number)[] = [];
+  if (data.number !== undefined) { fields.push("number = ?"); args.push(data.number); }
+  if (data.capacity !== undefined) { fields.push("capacity = ?"); args.push(data.capacity); }
+  if (data.zone !== undefined) { fields.push("zone = ?"); args.push(data.zone); }
+  if (data.active !== undefined) { fields.push("active = ?"); args.push(data.active); }
+  if (fields.length === 0) return;
+  args.push(id);
+  await client.execute({
+    sql: `UPDATE restaurant_tables SET ${fields.join(", ")} WHERE id = ?`,
+    args,
+  });
+}
+
+export async function deleteTable(id: number): Promise<void> {
+  await client.execute({ sql: "DELETE FROM restaurant_tables WHERE id = ?", args: [id] });
+}
+
+// Reservation detail update
+
+export async function updateReservation(id: number, data: {
+  table_id?: number;
+  customer_name?: string;
+  customer_phone?: string | null;
+  customer_email?: string | null;
+  party_size?: number;
+  reservation_date?: string;
+  reservation_time?: string;
+  status?: ReservationStatus;
+}): Promise<void> {
+  const fields: string[] = [];
+  const args: (string | number | null)[] = [];
+  if (data.table_id !== undefined) { fields.push("table_id = ?"); args.push(data.table_id); }
+  if (data.customer_name !== undefined) { fields.push("customer_name = ?"); args.push(data.customer_name); }
+  if (data.customer_phone !== undefined) { fields.push("customer_phone = ?"); args.push(data.customer_phone); }
+  if (data.customer_email !== undefined) { fields.push("customer_email = ?"); args.push(data.customer_email); }
+  if (data.party_size !== undefined) { fields.push("party_size = ?"); args.push(data.party_size); }
+  if (data.reservation_date !== undefined) { fields.push("reservation_date = ?"); args.push(data.reservation_date); }
+  if (data.reservation_time !== undefined) { fields.push("reservation_time = ?"); args.push(data.reservation_time); }
+  if (data.status !== undefined) { fields.push("status = ?"); args.push(data.status); }
+  if (fields.length === 0) return;
+  args.push(id);
+  await client.execute({
+    sql: `UPDATE reservations SET ${fields.join(", ")} WHERE id = ?`,
+    args,
   });
 }
