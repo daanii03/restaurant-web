@@ -4,6 +4,7 @@ import { StatusBadge } from "./StatusBadge";
 interface Props {
   reservations: Reservation[];
   onCancel: (id: number) => void;
+  onEdit: (r: Reservation) => void;
 }
 
 function formatDate(dateStr: string): string {
@@ -14,7 +15,7 @@ function formatDate(dateStr: string): string {
   });
 }
 
-export function ReservationTable({ reservations, onCancel }: Props) {
+export function ReservationTable({ reservations, onCancel, onEdit }: Props) {
   return (
     <div className="hidden md:block overflow-x-auto">
       <table className="w-full text-left text-primary">
@@ -41,15 +42,18 @@ export function ReservationTable({ reservations, onCancel }: Props) {
               <td className="p-3">{r.table_number}</td>
               <td className="p-3"><StatusBadge status={r.status} /></td>
               <td className="p-3">
-                {(r.status === "pending" || r.status === "confirmed") && (
-                  <button
-                    type="button"
-                    onClick={() => onCancel(r.id)}
-                    className="text-xs text-brand-red hover:text-white border border-brand-red hover:bg-brand-red px-2 py-1 rounded-sm transition-colors cursor-pointer"
-                  >
-                    Anular
-                  </button>
-                )}
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => onEdit(r)} className="text-xs text-accent-light hover:text-accent border border-accent-light/40 hover:border-accent px-2 py-1 rounded-sm transition-colors cursor-pointer">Editar</button>
+                  {(r.status === "pending" || r.status === "confirmed") && (
+                    <button
+                      type="button"
+                      onClick={() => onCancel(r.id)}
+                      className="text-xs text-brand-red hover:text-white border border-brand-red hover:bg-brand-red px-2 py-1 rounded-sm transition-colors cursor-pointer"
+                    >
+                      Anular
+                    </button>
+                  )}
+                </div>
               </td>
             </tr>
           ))}
