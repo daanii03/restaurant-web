@@ -4,12 +4,20 @@ import path from "path";
 
 type DishAllergen = { id: number; name: string; without_option: number };
 
-const client = createClient({
-  url: process.env.DATABASE_URL ?? "",
-  authToken: process.env.AUTH_TOKEN ?? "",
-});
+function getDbEnv() {
+  try {
+    return (import.meta as any).env ?? process.env;
+  } catch {
+    return process.env;
+  }
+}
 
 export async function generateDataJson(dataDir?: string) {
+  const env = getDbEnv();
+  const client = createClient({
+    url: env.DATABASE_URL ?? "",
+    authToken: env.AUTH_TOKEN ?? "",
+  });
   const dir = dataDir ?? path.resolve(process.cwd(), "src/data");
 
   const [dishesResult, categoriesResult, allergensResult] = await Promise.all([
