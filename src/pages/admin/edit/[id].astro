@@ -1,7 +1,22 @@
 ---
-import { getDishWithAllergens, getCategories, getAllergens } from "@db/queries";
+import dishes from "@data/dishes.json";
+import categoriesData from "@data/categories.json";
+import allAllergensData from "@data/allergens.json";
 import LayoutDashboard from "@layouts/LayoutDashboard.astro";
 import { DishForm } from "@components/DishForm"
+
+type DishAllergen = { id: number; name: string; without_option: number };
+type JsonDish = {
+  id: number;
+  name: string;
+  description: string | null;
+  price: number;
+  image: string | null;
+  category_id: number;
+  slug: string;
+  category_name: string;
+  allergens: DishAllergen[];
+};
 
 const { id } = Astro.params;
 
@@ -11,11 +26,23 @@ if (!id || isNaN(Number(id))) {
 
 const dishId = Number(id);
 
-const [dish, categories, allAllergens] = await Promise.all([
-  getDishWithAllergens(dishId),
-  getCategories(),
-  getAllergens(),
-]);
+const dishesData = dishes as JsonDish[];
+const jsonDish = dishesData.find((d) => d.id === dishId) ?? null;
+
+const dish = jsonDish
+  ? {
+      id: jsonDish.id,
+      name: jsonDish.name,
+      price: jsonDish.price,
+      description: jsonDish.description ?? "",
+      image: jsonDish.image ?? "",
+      category_id: jsonDish.category_id,
+      allergens: jsonDish.allergens.map((a) => a.id),
+      allergens_without: jsonDish.allergens
+        .filter((a) => a.without_option === 1)
+        .map((a) => a.id),
+    }
+  : null;
 ---
 
 <LayoutDashboard
@@ -29,8 +56,8 @@ const [dish, categories, allAllergens] = await Promise.all([
           <DishForm
             client:load
             dish={dish}
-            categories={categories}
-            allAllergens={allAllergens}
+            categories={categoriesData}
+            allAllergens={allAllergensData}
           />
         ) : (
           <p class="text-primary font-bold text-center py-10">

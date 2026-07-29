@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # database
 data/
+
+# generated data cache
+src/data/

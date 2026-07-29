@@ -2,12 +2,25 @@
 import LayoutDashboard from "@layouts/LayoutDashboard.astro";
 import FilterAdmin from "@components/Filter.astro";
 import DishCardAdmin from "@components/AdminDishCard.astro";
-import { getDishesWithAllergens } from "@db/queries";
+import dishes from "@data/dishes.json";
 import { verifySession } from "@utils/auth";
 
 if (!verifySession(Astro.cookies.get("admin_session")?.value)) return Astro.redirect("/admin");
 
-const dishes = await getDishesWithAllergens();
+type DishAllergen = { id: number; name: string; without_option: number };
+type AdminDish = {
+  id: number;
+  name: string;
+  description: string | null;
+  price: number;
+  image: string | null;
+  category_id: number;
+  slug: string;
+  category_name: string;
+  allergens: DishAllergen[];
+};
+
+const dishesData = dishes as AdminDish[];
 ---
 
 <LayoutDashboard title="Dashboard - Tu Restaurante" pageTitle="Gestión de la Carta">
@@ -28,12 +41,12 @@ const dishes = await getDishesWithAllergens();
         No hay platos que cumplan los filtros seleccionados.
       </p>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {dishes.map((dish) => (
+        {dishesData.map((dish) => (
           <DishCardAdmin
             dish={dish}
             allergens={dish.allergens}
             category={dish.category_name}
-            isEager={dishes.indexOf(dish) < 6}
+            isEager={dishesData.indexOf(dish) < 6}
           />
         ))}
       </div>

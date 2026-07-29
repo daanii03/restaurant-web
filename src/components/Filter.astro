@@ -1,5 +1,6 @@
 ---
-import { getCategories, getAllergens } from "@db/queries";
+import categoriesData from "@data/categories.json";
+import allAllergensData from "@data/allergens.json";
 
 export interface Props {
   class?: string;
@@ -7,8 +8,8 @@ export interface Props {
 }
 
 const { class: className = "", showAllergens = true } = Astro.props;
-const categories = await getCategories();
-const allergens = showAllergens ? await getAllergens() : [];
+const categories = categoriesData as { id: number; name: string; order: number }[];
+const allergens = showAllergens ? (allAllergensData as { id: number; name: string; icon: string | null }[]) : [];
 
 ---
 

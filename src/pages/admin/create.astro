@@ -1,15 +1,11 @@
 ---
 import LayoutDashboard from "@layouts/LayoutDashboard.astro";
 import { DishForm } from "@components/DishForm"
-import { getCategories, getAllergens } from "@db/queries";
+import categoriesData from "@data/categories.json";
+import allAllergensData from "@data/allergens.json";
 import { verifySession } from "@utils/auth";
 
 if (!verifySession(Astro.cookies.get("admin_session")?.value)) return Astro.redirect("/admin");
-
-const [categories, allAllergens] = await Promise.all([
-  getCategories(),
-  getAllergens(),
-]);
 ---
 
 <LayoutDashboard
@@ -20,8 +16,8 @@ const [categories, allAllergens] = await Promise.all([
     <div class="px-4 py-5 w-full max-w-2xl mx-auto">
       <DishForm
         client:load
-        categories={categories}
-        allAllergens={allAllergens}
+        categories={categoriesData}
+        allAllergens={allAllergensData}
       />
     </div>
   </section>

@@ -6,8 +6,9 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
+    "generate-data": "node --env-file=.env --experimental-strip-types src/scripts/generate-data.ts",
+    "dev": "npm run generate-data && astro dev",
+    "build": "npm run generate-data && astro build",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -32,6 +33,7 @@
     "@fontsource/eb-garamond": "^5.2.7",
     "@fontsource/hanken-grotesk": "^5.2.8",
     "@types/bcryptjs": "^3.0.0",
+    "tsx": "^4.23.1",
     "typescript": "^6.0.3"
   }
 }
