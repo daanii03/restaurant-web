@@ -1,0 +1,191 @@
+---
+import LayoutDashboard from "@layouts/LayoutDashboard.astro";
+import { verifySession } from "@utils/auth";
+import { getAllTables } from "@db/queries";
+
+if (!verifySession(Astro.cookies.get("admin_session")?.value)) return Astro.redirect("/admin");
+
+const tables = await getAllTables();
+const zones = [...new Set(tables.map(t => t.zone).filter(Boolean))];
+---
+
+<LayoutDashboard title="Mesas - Tu Restaurante" pageTitle="Gestionar Mesas">
+  <section class="w-full max-w-4xl mx-auto px-4 py-5">
+    <div class="flex justify-end mb-4">
+      <button id="add-btn" class="text-primary font-bold text-sm border border-brand-red hover:bg-brand-red transition-all duration-300 rounded-sm p-3 cursor-pointer">
+        + Añadir Mesa
+      </button>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-primary text-sm">
+        <thead>
+          <tr class="border-b border-muted/20">
+            <th class="p-2 font-bold">Nº</th>
+            <th class="p-2 font-bold">Capacidad</th>
+            <th class="p-2 font-bold">Zona</th>
+            <th class="p-2 font-bold">Activa</th>
+            <th class="p-2 font-bold">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tables.map(t => (
+            <tr class="border-b border-muted/10">
+              <td class="p-2">{t.number}</td>
+              <td class="p-2">{t.capacity} pers.</td>
+              <td class="p-2">{t.zone ?? "—"}</td>
+              <td class="p-2">{t.active ? "Sí" : "No"}</td>
+              <td class="p-2 flex gap-2">
+                <button class="edit-btn text-accent-light hover:text-accent transition-colors cursor-pointer text-xs" data-id={t.id} data-number={t.number} data-capacity={t.capacity} data-zone={t.zone ?? ""} data-active={t.active}>Editar</button>
+                <button class="delete-btn text-brand-red hover:text-red-400 transition-colors cursor-pointer text-xs" data-id={t.id}>Eliminar</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <div id="form-status" class="hidden text-center font-bold p-3 mt-4 rounded-sm border"></div>
+  </section>
+
+  <style>
+    dialog::backdrop { background: rgba(0,0,0,0.6); }
+    dialog { margin: auto; border: none; }
+  </style>
+
+  <dialog id="modal" class="bg-card text-primary rounded-sm border border-muted/20 p-6 max-w-md">
+    <form id="table-form" class="flex flex-col gap-3">
+      <input type="hidden" name="id" />
+      <h2 id="modal-title" class="text-accent font-serif text-xl mb-2">Añadir Mesa</h2>
+
+      <label class="flex flex-col gap-1 text-sm">
+        <span class="font-bold">Número</span>
+        <input type="number" name="number" required min="1" class="bg-elevated border border-muted/40 rounded-sm p-2 text-primary text-sm outline-none focus:border-primary/80" />
+      </label>
+
+      <label class="flex flex-col gap-1 text-sm">
+        <span class="font-bold">Capacidad</span>
+        <input type="number" name="capacity" required min="1" class="bg-elevated border border-muted/40 rounded-sm p-2 text-primary text-sm outline-none focus:border-primary/80" />
+      </label>
+
+      <label class="flex flex-col gap-1 text-sm">
+        <span class="font-bold">Zona</span>
+        <select name="zone" class="bg-elevated border border-muted/40 rounded-sm p-2 text-primary text-sm outline-none focus:border-primary/80">
+          <option value="">Sin zona</option>
+          {zones.map(z => <option value={z}>{z}</option>)}
+        </select>
+      </label>
+
+      <label class="flex items-center gap-2 text-sm cursor-pointer">
+        <input type="checkbox" name="active" value="1" checked class="w-4 h-4 accent-brand-red" />
+        <span>Mesa activa</span>
+      </label>
+
+      <div class="flex gap-2 mt-2">
+        <button type="submit" class="flex-1 text-primary font-bold bg-transparent border border-brand-red hover:bg-brand-red cursor-pointer transition-all duration-300 rounded-sm p-3 text-sm">GUARDAR</button>
+        <button type="button" id="cancel-btn" class="flex-1 text-primary/60 border border-muted/40 hover:text-primary cursor-pointer transition-all duration-300 rounded-sm p-3 text-sm">CANCELAR</button>
+      </div>
+    </form>
+  </dialog>
+</LayoutDashboard>
+
+<script>
+  const modal = document.getElementById("modal") as HTMLDialogElement;
+  const form = document.getElementById("table-form") as HTMLFormElement;
+  const modalTitle = document.getElementById("modal-title") as HTMLElement;
+  const statusEl = document.getElementById("form-status") as HTMLElement;
+
+  function setStatus(type: "success" | "error", text: string) {
+    statusEl.className = `text-center font-bold p-3 mt-4 rounded-sm border transition-colors ${
+      type === "success" ? "bg-green-900/40 text-green-400 border-green-500/50" : "bg-red-900/40 text-brand-red border-brand-red/50"
+    }`;
+    statusEl.textContent = text;
+    statusEl.classList.remove("hidden");
+    setTimeout(() => statusEl.classList.add("hidden"), 3000);
+  }
+
+  function openModal(editing = false) {
+    modalTitle.textContent = editing ? "Editar Mesa" : "Añadir Mesa";
+    (modal as any).showModal();
+  }
+
+  document.getElementById("add-btn")?.addEventListener("click", () => {
+    form.reset();
+    (form.querySelector("[name=active]") as HTMLInputElement).checked = true;
+    (form.querySelector("[name=id]") as HTMLInputElement).value = "";
+    openModal(false);
+  });
+
+  document.getElementById("cancel-btn")?.addEventListener("click", () => modal.close());
+
+  document.querySelectorAll(".edit-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const el = btn as HTMLElement;
+      (form.querySelector("[name=id]") as HTMLInputElement).value = el.dataset.id!;
+      (form.querySelector("[name=number]") as HTMLInputElement).value = el.dataset.number!;
+      (form.querySelector("[name=capacity]") as HTMLInputElement).value = el.dataset.capacity!;
+      (form.querySelector("[name=zone]") as HTMLInputElement).value = el.dataset.zone ?? "";
+      (form.querySelector("[name=active]") as HTMLInputElement).checked = el.dataset.active === "1";
+      openModal(true);
+    });
+  });
+
+  document.querySelectorAll(".delete-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      if (!confirm("¿Eliminar esta mesa?")) return;
+      const id = (btn as HTMLElement).dataset.id;
+      try {
+        const res = await fetch("/api/tables", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id }),
+        });
+        if (res.ok) {
+          setStatus("success", "Mesa eliminada");
+          btn.closest("tr")?.remove();
+        } else {
+          setStatus("error", "Error al eliminar");
+        }
+      } catch {
+        setStatus("error", "Error de conexión");
+      }
+    });
+  });
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = (form.querySelector("[name=id]") as HTMLInputElement).value;
+    const data: Record<string, any> = {
+      number: parseInt((form.querySelector("[name=number]") as HTMLInputElement).value),
+      capacity: parseInt((form.querySelector("[name=capacity]") as HTMLInputElement).value),
+      zone: (form.querySelector("[name=zone]") as HTMLInputElement).value || undefined,
+    };
+
+    try {
+      const url = id ? "/api/tables" : "/api/tables";
+      const method = id ? "PATCH" : "POST";
+      if (id) data.id = parseInt(id);
+      // For PATCH, also send active
+      if (id) {
+        data.active = (form.querySelector("[name=active]") as HTMLInputElement).checked ? 1 : 0;
+      }
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (res.ok) {
+        setStatus("success", id ? "Mesa actualizada" : "Mesa creada");
+        modal.close();
+        setTimeout(() => location.reload(), 500);
+      } else {
+        const err = await res.json();
+        setStatus("error", err.error || "Error");
+      }
+    } catch {
+      setStatus("error", "Error de conexión");
+    }
+  });
+</script>
