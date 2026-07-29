@@ -43,7 +43,9 @@ export function ReservationTable({ reservations, onCancel, onEdit }: Props) {
               <td className="p-3"><StatusBadge status={r.status} /></td>
               <td className="p-3">
                 <div className="flex gap-2">
-                  <button type="button" onClick={() => onEdit(r)} className="text-xs text-accent-light hover:text-accent border border-accent-light/40 hover:border-accent px-2 py-1 rounded-sm transition-colors cursor-pointer">Editar</button>
+                  {r.status === "confirmed" && (
+                    <button type="button" onClick={() => onEdit(r)} className="text-xs text-accent-light hover:text-accent border border-accent-light/40 hover:border-accent px-2 py-1 rounded-sm transition-colors cursor-pointer">Editar</button>
+                  )}
                   {(r.status === "pending" || r.status === "confirmed") && (
                     <button
                       type="button"

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import type { Reservation, Stats, Feedback } from "@components/admin/types";
 import { StatsCards } from "@components/admin/StatsCards";
 import { ReservationTable } from "@components/admin/ReservationTable";

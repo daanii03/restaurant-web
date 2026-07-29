@@ -36,9 +36,11 @@ export function ReservationMobileCards({ reservations, onCancel, onEdit }: Props
             <span>🪑 Mesa {r.table_number}</span>
             {r.customer_phone && <span className="text-primary/50 text-xs">📞 {r.customer_phone}</span>}
           </div>
-          {(r.status === "pending" || r.status === "confirmed") && (
-            <div className="mt-3 pt-3 border-t border-muted/10 flex gap-2">
+          <div className="mt-3 pt-3 border-t border-muted/10 flex gap-2">
+            {r.status === "confirmed" && (
               <button type="button" onClick={() => onEdit(r)} className="text-xs text-accent-light hover:text-accent border border-accent-light/40 hover:border-accent px-3 py-1.5 rounded-sm transition-colors cursor-pointer">Editar</button>
+            )}
+            {(r.status === "pending" || r.status === "confirmed") && (
               <button
                 type="button"
                 onClick={() => onCancel(r.id)}
@@ -46,8 +48,8 @@ export function ReservationMobileCards({ reservations, onCancel, onEdit }: Props
               >
                 Anular reserva
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       ))}
     </div>
