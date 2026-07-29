@@ -1,6 +1,6 @@
 ---
 import LayoutDashboard from "@layouts/LayoutDashboard.astro";
-import FilterAdmin from "@components/Filter.astro";
+import AdminFilter from "@components/AdminFilter.astro";
 import DishCardAdmin from "@components/AdminDishCard.astro";
 import { getDishesWithAllergens } from "@db/queries";
 import { verifySession } from "@utils/auth";
@@ -18,7 +18,7 @@ const dishesData = await getDishesWithAllergens();
   >
     + Nuevo Plato
   </a>
-  <FilterAdmin showAllergens={false} />
+  <AdminFilter />
   <section class="w-full">
     <div class="px-4 py-5 w-full max-w-7xl mx-auto">
       <p

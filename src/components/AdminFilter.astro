@@ -1,0 +1,107 @@
+---
+import { getCategories } from "@db/queries";
+
+const categories = await getCategories();
+---
+
+<nav class="flex flex-col">
+  <div
+    class="border-b border-b-muted/40 flex flex-row flex-wrap gap-2 py-3 px-4 justify-center md:gap-4 md:py-4 md:px-0"
+  >
+    <button
+      class="text-primary data-active:text-accent-light data-active:border-b data-active:border-b-accent-light cursor-pointer transition-colors duration-200"
+      data-active
+      data-filter-category="all"
+      aria-label="Mostrar todas las categorías"
+    >
+      Todos
+    </button>
+    {
+      categories.map((category) => (
+        <button
+          class="text-primary data-active:text-accent-light data-active:border-b data-active:border-b-accent-light cursor-pointer transition-colors duration-200"
+          data-filter-category={category.name}
+          aria-label={`Filtrar por categoría: ${category.name}`}
+        >
+          {category.name}
+        </button>
+      ))
+    }
+  </div>
+</nav>
+
+<script>
+  function initFilters() {
+    const categoryBtns = document.querySelectorAll("[data-filter-category]");
+    const dishes = document.querySelectorAll<HTMLElement>(".bg-card[data-category]");
+    const sections = document.querySelectorAll<HTMLElement>("[data-section='category']");
+    const noResults = document.getElementById("no-results");
+
+    let activeCategory: string | null = null;
+    let isAnimating = false;
+
+    function applyFilters() {
+      dishes.forEach((dish) => {
+        const dishCategory = dish.dataset.category;
+        const matchCategory = !activeCategory || dishCategory === activeCategory;
+        if (matchCategory) {
+          dish.removeAttribute("data-hidden");
+        } else {
+          dish.setAttribute("data-hidden", "");
+        }
+      });
+
+      sections.forEach((section) => {
+        const visibleDishes = section.querySelectorAll<HTMLElement>(".bg-card[data-category]:not([data-hidden])");
+        if (visibleDishes.length === 0) {
+          section.setAttribute("data-hidden", "");
+        } else {
+          section.removeAttribute("data-hidden");
+        }
+      });
+
+      const anyVisible = [...dishes].some((d) => !d.hasAttribute("data-hidden"));
+      if (noResults) {
+        noResults.classList.toggle("hidden", anyVisible);
+      }
+    }
+
+    function triggerFilterAnimation() {
+      if (isAnimating) return;
+      isAnimating = true;
+
+      dishes.forEach((dish) => {
+        dish.classList.add("opacity-0", "scale-95");
+      });
+
+      setTimeout(() => {
+        applyFilters();
+
+        setTimeout(() => {
+          dishes.forEach((dish) => {
+            if (!dish.hasAttribute("data-hidden")) {
+              dish.classList.remove("opacity-0", "scale-95");
+            }
+          });
+
+          isAnimating = false;
+        }, 30);
+      }, 300);
+    }
+
+    categoryBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const el = btn as HTMLElement;
+        const cat = el.dataset.filterCategory;
+
+        categoryBtns.forEach((b) => b.removeAttribute("data-active"));
+        el.setAttribute("data-active", "");
+
+        activeCategory = cat === "all" ? null : (cat ?? null);
+        triggerFilterAnimation();
+      });
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", initFilters);
+</script>
