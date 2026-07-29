@@ -21,7 +21,7 @@ function calculateStats(reservations: Reservation[], totalTables: number): Stats
     .filter((r) => r.status === "pending" || r.status === "confirmed")
     .map((r) => r.table_id);
   const freeTables = totalTables - new Set(reservedTableIds).size;
-  return { totalToday, freeTables, totalPeople };
+  return { totalToday, freeTables, totalPeople, totalTables };
 }
 
 function Skeleton({ className }: { className?: string }) {
