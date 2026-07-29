@@ -61,18 +61,19 @@ export function DishForm({
         body: formData,
       });
 
-      if (isEdit && response.redirected) {
-        window.location.href = "/admin/dashboard";
-        return;
-      }
-
       const data = await response.json();
 
       if (response.ok) {
         setStatus({
           type: "success",
-          text: "Plato creado con éxito",
+          text: isEdit ? "Plato actualizado con éxito" : "Plato creado con éxito",
         });
+
+        if (isEdit) {
+          await new Promise((r) => setTimeout(r, 2000));
+          window.location.href = "/admin/dashboard";
+          return;
+        }
       } else {
         const errorText =
           typeof data.error === "object"
