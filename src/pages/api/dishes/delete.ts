@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { z } from "zod"
 import { deleteDish } from "@db/queries";
 import { verifySession } from "@utils/auth";
+import { generateDataJson } from "@db/generate-json";
 
 const deleteDishSchema = z.object({
     dish_id: z.coerce.number().int().positive()
@@ -16,6 +17,7 @@ export const POST: APIRoute = async ({request, redirect ,cookies}) =>{
         const validateData = deleteDishSchema.parse(data);
 
         await deleteDish(validateData.dish_id);
+        await generateDataJson();
         return redirect("/admin/dashboard");
     } catch (error) {
         if (error instanceof z.ZodError){
