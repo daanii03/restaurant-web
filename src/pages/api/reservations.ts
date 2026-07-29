@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { getUpcomingReservations, createReservation, getAvailableTables, updateReservationStatus, completeOldReservations } from "@db/queries";
+import { getUpcomingReservations, createReservation, getAvailableTables, updateReservationStatus, updateReservation, completeOldReservations, getActiveTableCount } from "@db/queries";
 import { verifySession } from "@utils/auth";
 
 const phoneRegex = /^(\+34)?[679]\d{8}$/;
@@ -24,12 +24,14 @@ export const GET: APIRoute = async ({ cookies }) => {
 
   try {
     await completeOldReservations();
-    const reservations = await getUpcomingReservations();
+    const [reservations, totalTables] = await Promise.all([
+      getUpcomingReservations(),
+      getActiveTableCount(),
+    ]);
     const today = new Date().toISOString().split("T")[0];
     const todayReservations = reservations.filter((r) => r.reservation_date === today && r.status !== "cancelled");
     const totalToday = todayReservations.length;
     const totalPeople = todayReservations.reduce((sum, r) => sum + r.party_size, 0);
-    const totalTables = 15;
     const reservedTableIds = todayReservations
       .filter((r) => r.status === "pending" || r.status === "confirmed")
       .map((r) => r.table_id);
@@ -38,7 +40,7 @@ export const GET: APIRoute = async ({ cookies }) => {
     return new Response(
       JSON.stringify({
         reservations,
-        stats: { totalToday, freeTables, totalPeople },
+        stats: { totalToday, freeTables, totalPeople, totalTables },
       }),
       { status: 200, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } },
     );
@@ -56,6 +58,18 @@ const statusSchema = z.object({
   status: z.enum(["pending", "confirmed", "cancelled", "completed"]),
 });
 
+const updateSchema = z.object({
+  id: z.coerce.number().int().positive(),
+  customer_name: z.string().min(1).optional(),
+  customer_phone: z.string().optional().nullable(),
+  customer_email: z.string().optional().nullable(),
+  party_size: z.coerce.number().int().positive().optional(),
+  reservation_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  reservation_time: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+  table_id: z.coerce.number().int().positive().optional(),
+  status: z.enum(["pending", "confirmed", "cancelled", "completed"]).optional(),
+});
+
 export const PATCH: APIRoute = async ({ request, cookies }) => {
   if (!verifySession(cookies.get("admin_session")?.value)) {
     return new Response(JSON.stringify({ error: "No tienes permiso." }), {
@@ -66,8 +80,19 @@ export const PATCH: APIRoute = async ({ request, cookies }) => {
 
   try {
     const data = await request.json();
-    const result = statusSchema.safeParse(data);
 
+    // If only id + status, use simple status update (backwards compat)
+    const statusResult = statusSchema.safeParse(data);
+    if (statusResult.success && Object.keys(data).length === 2) {
+      await updateReservationStatus(statusResult.data.id, statusResult.data.status);
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // Otherwise, try full update
+    const result = updateSchema.safeParse(data);
     if (!result.success) {
       return new Response(JSON.stringify({ error: "Datos inválidos." }), {
         status: 400,
@@ -75,7 +100,8 @@ export const PATCH: APIRoute = async ({ request, cookies }) => {
       });
     }
 
-    await updateReservationStatus(result.data.id, result.data.status);
+    const { id, ...fields } = result.data;
+    await updateReservation(id, fields);
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: { "Content-Type": "application/json" },

@@ -4,12 +4,13 @@ import { StatsCards } from "@components/admin/StatsCards";
 import { ReservationTable } from "@components/admin/ReservationTable";
 import { ReservationMobileCards } from "@components/admin/ReservationMobileCards";
 import { NewReservationModal } from "@components/admin/NewReservationModal";
+import { EditReservationModal } from "@components/admin/EditReservationModal";
 
 function todayStr(): string {
   return new Date().toISOString().split("T")[0];
 }
 
-function calculateStats(reservations: Reservation[]): Stats {
+function calculateStats(reservations: Reservation[], totalTables: number): Stats {
   const today = todayStr();
   const todayActive = reservations.filter(
     (r) => r.reservation_date === today && r.status !== "cancelled"
@@ -19,7 +20,7 @@ function calculateStats(reservations: Reservation[]): Stats {
   const reservedTableIds = todayActive
     .filter((r) => r.status === "pending" || r.status === "confirmed")
     .map((r) => r.table_id);
-  const freeTables = 15 - new Set(reservedTableIds).size;
+  const freeTables = totalTables - new Set(reservedTableIds).size;
   return { totalToday, freeTables, totalPeople };
 }
 
@@ -31,11 +32,14 @@ export function AdminReservationPanel() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [stats, setStats] = useState<Stats>({
     totalToday: 0,
-    freeTables: 15,
+    freeTables: 0,
     totalPeople: 0,
   });
+  const [totalTables, setTotalTables] = useState(0);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
   const [feedback, setFeedback] = useState<Feedback>(null);
 
   const fetchData = useCallback(async () => {
@@ -49,6 +53,7 @@ export function AdminReservationPanel() {
       );
       setReservations(filtered);
       setStats(data.stats);
+      setTotalTables(data.stats.totalTables);
       setLoading(false);
     } catch (err) {
       console.error("Error fetching reservations:", err);
@@ -89,7 +94,7 @@ export function AdminReservationPanel() {
       r.id === id ? { ...r, status: "cancelled" } : r
     );
     setReservations(updated);
-    setStats(calculateStats(updated));
+    setStats(calculateStats(updated, totalTables));
     setFeedback({ type: "success", text: "Reserva cancelada" });
     try {
       const res = await fetch("/api/reservations", {
@@ -110,7 +115,7 @@ export function AdminReservationPanel() {
   const handleCreated = (reservation: Reservation) => {
     const updated = [reservation, ...reservations];
     setReservations(updated);
-    setStats(calculateStats(updated));
+    setStats(calculateStats(updated, totalTables));
     fetchData();
   };
 
@@ -152,8 +157,8 @@ export function AdminReservationPanel() {
             <p className="text-primary/60 italic">No hay próximas reservas.</p>
           ) : (
             <>
-              <ReservationTable reservations={reservations} onCancel={handleCancel} />
-              <ReservationMobileCards reservations={reservations} onCancel={handleCancel} />
+              <ReservationTable reservations={reservations} onCancel={handleCancel} onEdit={(r) => { setEditingReservation(r); setEditModalOpen(true); }} />
+              <ReservationMobileCards reservations={reservations} onCancel={handleCancel} onEdit={(r) => { setEditingReservation(r); setEditModalOpen(true); }} />
             </>
           )}
         </div>
@@ -163,6 +168,13 @@ export function AdminReservationPanel() {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onCreated={handleCreated}
+        onFeedback={(text, type) => setFeedback({ type, text })}
+      />
+      <EditReservationModal
+        reservation={editingReservation}
+        open={editModalOpen}
+        onClose={() => { setEditModalOpen(false); setEditingReservation(null); }}
+        onUpdated={fetchData}
         onFeedback={(text, type) => setFeedback({ type, text })}
       />
     </>
