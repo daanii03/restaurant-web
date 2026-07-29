@@ -61,12 +61,17 @@ export function DishForm({
         body: formData,
       });
 
+      if (isEdit && response.redirected) {
+        window.location.href = "/admin/dashboard";
+        return;
+      }
+
       const data = await response.json();
 
       if (response.ok) {
         setStatus({
           type: "success",
-          text: isEdit ? "Plato actualizado con éxito" : "Plato creado con éxito",
+          text: "Plato creado con éxito",
         });
       } else {
         const errorText =

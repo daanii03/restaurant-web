@@ -28,7 +28,7 @@ const updateDishSchema = z.object({
   allergens_without: z.array(z.coerce.number()).default([]),
 });
 
-export const POST: APIRoute = async ({ request, cookies }) => {
+export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   if (!verifySession(cookies.get("admin_session")?.value)) {
     return new Response(JSON.stringify({ error: "No tienes permiso." }), {
       status: 403,
@@ -86,7 +86,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
     await generateDataJson();
 
-    return new Response(JSON.stringify({ success: true }), { status: 200 });
+    return redirect("/admin/dashboard");
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Error interno del servidor" }),
