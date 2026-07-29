@@ -86,6 +86,21 @@ const pageTitleFormatted = title ?? `Gestión - Tu Restaurante`;
           class={pathname === "/admin/hours" ? is_active : default_style}
           aria-current={pathname === "/admin/hours" ? "page" : undefined}
         >Horarios</a>
+        <a
+          href="/admin/tables"
+          class={pathname === "/admin/tables" ? is_active : default_style}
+          aria-current={pathname === "/admin/tables" ? "page" : undefined}
+        >Mesas</a>
+        <a
+          href="/admin/categories"
+          class={pathname === "/admin/categories" ? is_active : default_style}
+          aria-current={pathname === "/admin/categories" ? "page" : undefined}
+        >Categorías</a>
+        <a
+          href="/admin/allergens"
+          class={pathname === "/admin/allergens" ? is_active : default_style}
+          aria-current={pathname === "/admin/allergens" ? "page" : undefined}
+        >Alérgenos</a>
       </nav>
       <div class="mt-auto flex flex-col gap-2 pt-4 border-t border-muted/20">
         <a
