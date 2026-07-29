@@ -5,7 +5,8 @@ interface Props {
 }
 
 export function StatsCards({ stats }: Props) {
-  const todayOccupied = 15 - stats.freeTables;
+  const totalTables = stats.totalTables || 1;
+  const todayOccupied = totalTables - stats.freeTables;
 
   const cards = [
     {
@@ -28,7 +29,7 @@ export function StatsCards({ stats }: Props) {
       ),
       footer: (
         <div className="w-full bg-muted/30 rounded-full h-1.5 mt-2">
-          <div className="bg-primary h-1.5 rounded-full" style={{ width: `${(stats.freeTables / 15) * 100}%` }} />
+          <div className="bg-primary h-1.5 rounded-full" style={{ width: `${(stats.freeTables / totalTables) * 100}%` }} />
         </div>
       ),
     },

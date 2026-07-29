@@ -17,6 +17,7 @@ export interface Stats {
   totalToday: number;
   freeTables: number;
   totalPeople: number;
+  totalTables: number;
 }
 
 export type Feedback = { type: "success" | "error"; text: string } | null;
