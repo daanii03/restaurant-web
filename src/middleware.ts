@@ -10,7 +10,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set(
     "Permissions-Policy",
-    "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+    "camera=(), microphone=(), geolocation=()",
   );
 
   const contentType = headers.get("content-type") ?? "";
