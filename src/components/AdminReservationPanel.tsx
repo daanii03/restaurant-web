@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import type { Reservation, Stats, Feedback } from "@components/admin/types";
 import { StatsCards } from "@components/admin/StatsCards";
 import { ReservationTable } from "@components/admin/ReservationTable";
@@ -6,8 +6,20 @@ import { ReservationMobileCards } from "@components/admin/ReservationMobileCards
 import { NewReservationModal } from "@components/admin/NewReservationModal";
 import { EditReservationModal } from "@components/admin/EditReservationModal";
 
+const POLL_INTERVAL_MS = 60 * 1000;
+
 function todayStr(): string {
   return new Date().toISOString().split("T")[0];
+}
+
+export function findNewCancellations(
+  prev: ReadonlyMap<number, string> | null,
+  current: Reservation[],
+): Reservation[] {
+  if (!prev) return [];
+  return current.filter(
+    (r) => r.status === "cancelled" && prev.has(r.id) && prev.get(r.id) !== "cancelled",
+  );
 }
 
 function calculateStats(reservations: Reservation[], totalTables: number): Stats {
@@ -41,6 +53,7 @@ export function AdminReservationPanel() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
   const [feedback, setFeedback] = useState<Feedback>(null);
+  const prevStatusesRef = useRef<Map<number, string> | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -51,10 +64,24 @@ export function AdminReservationPanel() {
       const filtered = (data.reservations as Reservation[]).filter(
         (r) => r.reservation_date >= today
       );
+      const newlyCancelled = findNewCancellations(prevStatusesRef.current, filtered);
+      prevStatusesRef.current = new Map(filtered.map((r) => [r.id, r.status]));
       setReservations(filtered);
       setStats(data.stats);
       setTotalTables(data.stats.totalTables);
       setLoading(false);
+      if (newlyCancelled.length === 1) {
+        const r = newlyCancelled[0];
+        setFeedback({
+          type: "error",
+          text: `Reserva cancelada por el cliente: ${r.customer_name} · Mesa ${r.table_number} · ${r.reservation_time}`,
+        });
+      } else if (newlyCancelled.length > 1) {
+        setFeedback({
+          type: "error",
+          text: `${newlyCancelled.length} reservas canceladas por clientes`,
+        });
+      }
     } catch (err) {
       console.error("Error fetching reservations:", err);
       setLoading(false);
@@ -63,7 +90,7 @@ export function AdminReservationPanel() {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 5 * 60 * 1000);
+    const interval = setInterval(fetchData, POLL_INTERVAL_MS);
     return () => clearInterval(interval);
   }, [fetchData]);
 
@@ -94,6 +121,7 @@ export function AdminReservationPanel() {
       r.id === id ? { ...r, status: "cancelled" } : r
     );
     setReservations(updated);
+    if (prevStatusesRef.current) prevStatusesRef.current.set(id, "cancelled");
     setStats(calculateStats(updated, totalTables));
     setFeedback({ type: "success", text: "Reserva cancelada" });
     try {
@@ -115,6 +143,7 @@ export function AdminReservationPanel() {
   const handleCreated = (reservation: Reservation) => {
     const updated = [reservation, ...reservations];
     setReservations(updated);
+    if (prevStatusesRef.current) prevStatusesRef.current.set(reservation.id, reservation.status);
     setStats(calculateStats(updated, totalTables));
     fetchData();
   };
@@ -123,7 +152,7 @@ export function AdminReservationPanel() {
     <>
       {feedback && (
         <div
-          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-sm border font-bold text-sm transition-all ${
+          className={`fixed bottom-4 right-4 z-50 px-4 py-3 rounded-sm border font-bold text-sm transition-all ${
             feedback.type === "success"
               ? "bg-green-900/40 text-green-400 border-green-500/50"
               : "bg-red-900/40 text-brand-red border-brand-red/50"
