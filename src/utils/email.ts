@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import crypto from "node:crypto";
+import { restaurant } from "@data/restaurant";
 
 const resend = new Resend(import.meta.env.RESEND_API_KEY);
 const CANCEL_SECRET = import.meta.env.CANCEL_SECRET;
@@ -47,7 +48,7 @@ export async function sendEmail(params: {
       <body>
         <div class="container">
           <div class="header">
-            <h1>Tu Restaurante</h1>
+            <h1>${restaurant.name}</h1>
           </div>
           <div class="content">
             <!-- AQUÍ SE INYECTAN LOS DATOS -->
@@ -68,16 +69,16 @@ export async function sendEmail(params: {
             </div>
           </div>
           <div class="footer">
-            <p>Tu Restaurante &copy; 2026. Todos los derechos reservados.</p>
+            <p>${restaurant.name} &copy; 2026. Todos los derechos reservados.</p>
           </div>
         </div>
       </body>
       </html>
     `;
     await resend.emails.send({
-      from: "Tu Restaurante <onboarding@resend.dev>",
+      from: `${restaurant.email.fromName} <${restaurant.email.fromAddress}>`,
       to: params.to,
-      subject: "Reserva confirmada - Tu Restaurante",
+      subject: `${restaurant.email.subject} - ${restaurant.name}`,
       html,
     });
 }

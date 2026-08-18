@@ -4,13 +4,14 @@ import AdminFilter from "@components/AdminFilter.astro";
 import DishCardAdmin from "@components/AdminDishCard.astro";
 import { getDishesWithAllergens } from "@db/queries";
 import { verifySession } from "@utils/auth";
+import { restaurant } from "@data/restaurant";
 
 if (!verifySession(Astro.cookies.get("admin_session")?.value)) return Astro.redirect("/admin");
 
 const dishesData = await getDishesWithAllergens();
 ---
 
-<LayoutDashboard title="Dashboard - Tu Restaurante" pageTitle="Gestión de la Carta">
+<LayoutDashboard title={`Dashboard - ${restaurant.name}`} pageTitle="Gestión de la Carta">
   <a
     slot="header-right"
     href="/admin/create"

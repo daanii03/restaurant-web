@@ -2,13 +2,14 @@
 import LayoutDashboard from "@layouts/LayoutDashboard.astro";
 import { verifySession } from "@utils/auth";
 import { getAllergens } from "@db/queries";
+import { restaurant } from "@data/restaurant";
 
 if (!verifySession(Astro.cookies.get("admin_session")?.value)) return Astro.redirect("/admin");
 
 const allergens = await getAllergens();
 ---
 
-<LayoutDashboard title="Alérgenos - Tu Restaurante" pageTitle="Gestionar Alérgenos">
+<LayoutDashboard title={`Alérgenos - ${restaurant.name}`} pageTitle="Gestionar Alérgenos">
   <section class="w-full max-w-2xl mx-auto px-4 py-5">
     <div class="flex justify-end mb-4">
       <button id="add-btn" class="text-primary font-bold text-sm border border-brand-red hover:bg-brand-red transition-all duration-300 rounded-sm p-3 cursor-pointer">

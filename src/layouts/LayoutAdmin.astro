@@ -10,6 +10,7 @@ import "@fontsource/eb-garamond/700.css"; // Bold
 import "@fontsource/hanken-grotesk/400.css";
 import "@fontsource/hanken-grotesk/700.css";
 import "@styles/global.css";
+import { restaurant } from "@data/restaurant";
 
 ---
 
@@ -28,7 +29,7 @@ import "@styles/global.css";
       Saltar al contenido principal
     </a>
     <header class="justify-center items-center flex flex-col">
-        <h1 class="text-primary font-serif py-4 text-4xl font-bold">Tu Restaurante</h1>
+        <h1 class="text-primary font-serif py-4 text-4xl font-bold">{restaurant.name}</h1>
         <p class="text-primary font-bold text-sm">PANEL DE ADMINISTRACIÓN</p>
     </header>
     <main id="admin-login-content" class="flex flex-col justify-center items-center py-10" role="main">

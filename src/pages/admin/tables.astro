@@ -2,6 +2,7 @@
 import LayoutDashboard from "@layouts/LayoutDashboard.astro";
 import { verifySession } from "@utils/auth";
 import { getAllTables } from "@db/queries";
+import { restaurant } from "@data/restaurant";
 
 if (!verifySession(Astro.cookies.get("admin_session")?.value)) return Astro.redirect("/admin");
 
@@ -9,7 +10,7 @@ const tables = await getAllTables();
 const zones = [...new Set(tables.map(t => t.zone).filter(Boolean))];
 ---
 
-<LayoutDashboard title="Mesas - Tu Restaurante" pageTitle="Gestionar Mesas">
+<LayoutDashboard title={`Mesas - ${restaurant.name}`} pageTitle="Gestionar Mesas">
   <section class="w-full max-w-4xl mx-auto px-4 py-5">
     <div class="flex justify-end mb-4">
       <button id="add-btn" class="text-primary font-bold text-sm border border-brand-red hover:bg-brand-red transition-all duration-300 rounded-sm p-3 cursor-pointer">

@@ -4,12 +4,13 @@ import { DishForm } from "@components/DishForm"
 import categoriesData from "@data/categories.json";
 import allAllergensData from "@data/allergens.json";
 import { verifySession } from "@utils/auth";
+import { restaurant } from "@data/restaurant";
 
 if (!verifySession(Astro.cookies.get("admin_session")?.value)) return Astro.redirect("/admin");
 ---
 
 <LayoutDashboard
-  title="Nuevo Plato - Tu Restaurante"
+  title={`Nuevo Plato - ${restaurant.name}`}
   pageTitle="Nuevo Plato"
 >
   <section class="w-full">

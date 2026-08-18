@@ -1,5 +1,6 @@
 ---
 import hoursConfig from "@data/hours.json";
+import { restaurant } from "@data/restaurant";
 
 type HoursData = Record<string, { closed?: boolean; slots?: string[][] }>;
 const hours = hoursConfig as HoursData;
@@ -22,14 +23,14 @@ function formatHours(h: HoursData[string]): string {
 
 <footer class="grid grid-cols-1 sm:grid-cols-3 gap-6 bg-elevated p-6 text-primary" role="contentinfo">
   <div>
-    <h2 class="font-serif text-lg mb-2">Tu Restaurante</h2>
-    <p class="text-sm text-primary/60">Restaurante en Tu Ciudad, Tu Región.</p>
+    <h2 class="font-serif text-lg mb-2">{restaurant.name}</h2>
+    <p class="text-sm text-primary/60">{restaurant.tagline}</p>
   </div>
   <div>
     <h3 class="font-bold text-sm mb-2">Contacto</h3>
-    <p class="text-sm text-primary/60">Calle de Tu Restaurante, 1</p>
-    <p class="text-sm text-primary/60">00000 Tu Ciudad, Tu Región</p>
-    <a href="tel:+34600000000" class="text-sm text-accent-light hover:underline">+34 600 00 00 00</a>
+    <p class="text-sm text-primary/60">{restaurant.address.street}</p>
+    <p class="text-sm text-primary/60">{restaurant.address.postalCode} {restaurant.address.locality}, {restaurant.address.region}</p>
+    <a href={`tel:${restaurant.phone.tel}`} class="text-sm text-accent-light hover:underline">{restaurant.phone.display}</a>
   </div>
   <div>
     <h3 class="font-bold text-sm mb-2">Horario</h3>
@@ -43,6 +44,6 @@ function formatHours(h: HoursData[string]): string {
     }
   </div>
   <div class="sm:col-span-3 text-center text-xs text-primary/40 pt-4 border-t border-muted/20">
-    &copy; {new Date().getFullYear()} Tu Restaurante. Todos los derechos reservados.
+    &copy; {new Date().getFullYear()} {restaurant.name}. Todos los derechos reservados.
   </div>
 </footer>

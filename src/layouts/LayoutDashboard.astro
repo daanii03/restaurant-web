@@ -11,13 +11,14 @@ import "@fontsource/eb-garamond/700.css";
 import "@fontsource/hanken-grotesk/400.css";
 import "@fontsource/hanken-grotesk/700.css";
 import "@styles/global.css";
+import { restaurant } from "@data/restaurant";
 
 const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
 const default_style =
   "text-primary hover:text-accent hover:scale-105 transition duration-300";
 const is_active = "text-accent";
 const siteUrl = import.meta.env.PUBLIC_SITE_URL ?? "http://localhost:4321";
-const pageTitleFormatted = title ?? `Gestión - Tu Restaurante`;
+const pageTitleFormatted = title ?? `Gestión - ${restaurant.name}`;
 ---
 
 <!doctype html>
@@ -29,7 +30,7 @@ const pageTitleFormatted = title ?? `Gestión - Tu Restaurante`;
     <link rel="icon" href="/favicon.ico" />
     <meta name="generator" content={Astro.generator} />
     <title>{pageTitleFormatted}</title>
-    <meta name="description" content="Panel de gestión de Tu Restaurante, restaurante en Tu Ciudad." />
+    <meta name="description" content={`Panel de gestión de ${restaurant.name}, restaurante en ${restaurant.address.locality}.`} />
     <meta name="robots" content="noindex, nofollow" />
     <link rel="canonical" href={siteUrl + Astro.url.pathname} />
   </head>
@@ -51,7 +52,7 @@ const pageTitleFormatted = title ?? `Gestión - Tu Restaurante`;
       aria-label="Navegación del panel"
     >
       <div class="flex items-center justify-between md:justify-start">
-        <h1 class="text-primary font-serif text-4xl">Tu Restaurante</h1>
+        <h1 class="text-primary font-serif text-4xl">{restaurant.name}</h1>
         <button class="md:hidden text-primary text-2xl" data-toggle-sidebar aria-label="Cerrar menú lateral">
           <svg
             xmlns="http://www.w3.org/2000/svg"

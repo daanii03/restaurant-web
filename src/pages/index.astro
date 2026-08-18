@@ -3,9 +3,10 @@ export const prerender = true;
 import Layout from "@layouts/Layout.astro";
 import Hero from "@components/Hero.astro";
 import History from "@components/History.astro";
+import { restaurant } from "@data/restaurant";
 ---
 
-<Layout title="Tu Restaurante" description="Restaurante en Tu Ciudad, Tu Región. Especialistas en carnes maduradas y hamburguesas gourmet. Descubre nuestra carta con ingredientes locales de primera calidad y reserva tu mesa.">
+<Layout title={restaurant.name} description={restaurant.seo.homeDescription}>
   <Hero />
   <History/>
 </Layout>

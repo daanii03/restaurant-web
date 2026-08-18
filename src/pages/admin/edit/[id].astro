@@ -4,6 +4,7 @@ import categoriesData from "@data/categories.json";
 import allAllergensData from "@data/allergens.json";
 import LayoutDashboard from "@layouts/LayoutDashboard.astro";
 import { DishForm } from "@components/DishForm"
+import { restaurant } from "@data/restaurant";
 
 const { id } = Astro.params;
 
@@ -17,7 +18,7 @@ const dish = await getDishWithAllergens(dishId);
 ---
 
 <LayoutDashboard
-  title={`Editar ${dish ? dish.name : "Plato"} - Tu Restaurante`}
+  title={`Editar ${dish ? dish.name : "Plato"} - ${restaurant.name}`}
   pageTitle={`Editar: ${dish ? dish.name : "Plato"}`}
 >
   <section class="w-full">

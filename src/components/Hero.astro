@@ -1,6 +1,7 @@
 ---
 import { Image } from "astro:assets";
 import hero from "@assets/hero.webp";
+import { restaurant } from "@data/restaurant";
 ---
 
 <section
@@ -19,7 +20,7 @@ import hero from "@assets/hero.webp";
   >
   </div>
   <article class="flex flex-col relative justify-start max-w-xl gap-y-4 px-8">
-    <span class="text-accent-light">Tu Ciudad</span>
+    <span class="text-accent-light">{restaurant.locality}</span>
     <h1 class="font-bold leading-tight text-4xl font-serif text-primary">
       Tradición. <br />
       Fuego. <br />

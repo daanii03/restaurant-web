@@ -1,4 +1,5 @@
 ---
+import { restaurant } from "@data/restaurant";
 const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
 const default_style =
   "text-primary hover:text-accent hover:scale-105 transition duration-300";
@@ -9,8 +10,8 @@ const is_active = "text-accent";
   class="bg-elevated sticky top-0 z-10 sm:grid grid-cols-3 p-4 items-center"
   role="banner"
 >
-  <a href="/" class="text-primary text-2xl p-4 font-serif text-center sm:text-start no-underline hover:text-accent transition-colors" aria-label="Tu Restaurante - Ir al inicio">
-    Tu Restaurante
+  <a href="/" class="text-primary text-2xl p-4 font-serif text-center sm:text-start no-underline hover:text-accent transition-colors" aria-label={`${restaurant.name} - Ir al inicio`}>
+    {restaurant.name}
   </a>
   <nav class="hidden sm:flex gap-2 justify-self-center p-4" aria-label="Navegación principal">
     <a

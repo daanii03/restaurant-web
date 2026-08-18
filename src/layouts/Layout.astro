@@ -5,7 +5,7 @@ export interface Props {
   justify?: "start" | "center";
 }
 
-const { title = "Tu Restaurante", description = "Restaurante en Tu Ciudad, Tu Región. Especialistas en carnes maduradas y hamburguesas gourmet. Descubre nuestra carta y reserva tu mesa.", justify = "center" } = Astro.props;
+const { title = restaurant.name, description = restaurant.seo.description, justify = "center" } = Astro.props;
 
 import "@fontsource/eb-garamond/400.css";
 import "@fontsource/eb-garamond/700.css";
@@ -17,6 +17,7 @@ import Footer from "@components/Footer.astro";
 import MobileNav from "@components/MobileNav.astro";
 
 import hoursConfig from "@data/hours.json";
+import { restaurant } from "@data/restaurant";
 type HoursData = Record<string, { closed?: boolean; slots?: string[][] }>;
 const hoursData = hoursConfig as HoursData;
 
@@ -49,7 +50,7 @@ function toSeoHours() {
 }
 
 const siteUrl = import.meta.env.PUBLIC_SITE_URL ?? "http://localhost:4321";
-const fullTitle = title === "Tu Restaurante" ? title : `${title} | Tu Restaurante`;
+const fullTitle = title === restaurant.name ? title : `${title} | ${restaurant.name}`;
 ---
 
 <!doctype html>
@@ -62,7 +63,7 @@ const fullTitle = title === "Tu Restaurante" ? title : `${title} | Tu Restaurant
     <meta name="generator" content={Astro.generator} />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    <meta name="keywords" content="Tu Restaurante, restaurante Tu Ciudad, bar Tu Ciudad, Tu Región, carnes maduradas, hamburguesas gourmet, cocina castellana, restaurante Tu Región" />
+    <meta name="keywords" content={restaurant.seo.keywords} />
     <link rel="canonical" href={siteUrl + Astro.url.pathname} />
 
     <meta property="og:title" content={fullTitle} />
@@ -78,19 +79,19 @@ const fullTitle = title === "Tu Restaurante" ? title : `${title} | Tu Restaurant
     <script type="application/ld+json" set:html={JSON.stringify({
       "@context": "https://schema.org",
       "@type": "Restaurant",
-      name: "Tu Restaurante",
-      description: "Restaurante en Tu Ciudad especializado en carnes maduradas y hamburguesas gourmet.",
+      name: restaurant.name,
+      description: restaurant.seo.schemaDescription,
       url: siteUrl,
-      telephone: "+34600000000",
-      servesCuisine: ["Española", "Castellana", "Hamburguesas gourmet", "Carnes maduradas"],
-      priceRange: "€€",
+      telephone: restaurant.phone.tel,
+      servesCuisine: restaurant.servesCuisine,
+      priceRange: restaurant.priceRange,
       address: {
         "@type": "PostalAddress",
-        streetAddress: "Calle de Tu Restaurante, 1",
-        addressLocality: "Tu Ciudad",
-        addressRegion: "Tu Región",
-        postalCode: "00000",
-        addressCountry: "ES",
+        streetAddress: restaurant.address.street,
+        addressLocality: restaurant.address.locality,
+        addressRegion: restaurant.address.region,
+        postalCode: restaurant.address.postalCode,
+        addressCountry: restaurant.address.country,
       },
       openingHoursSpecification: toSeoHours(),
     })} />
