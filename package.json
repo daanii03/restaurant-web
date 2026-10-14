@@ -7,8 +7,8 @@
   },
   "scripts": {
     "generate-data": "node --env-file=.env --experimental-strip-types src/scripts/generate-data.ts",
-    "dev": "npm run generate-data && astro dev",
-    "build": "npm run generate-data && astro build",
+    "dev": "pnpm run generate-data && astro dev",
+    "build": "pnpm run generate-data && astro build",
     "preview": "astro preview",
     "astro": "astro",
     "test": "vitest run",

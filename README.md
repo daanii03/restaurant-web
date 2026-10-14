@@ -1,6 +1,6 @@
 # Tu Restaurante — Web del Restaurante
 
-Sitio web oficial del restaurante Tu Restaurante. Incluye carta digital, sistema de reservas con confirmación por email, panel de administración para gestionar platos y reservas, y cancelación mediante enlace firmado.
+Sitio web oficial de Tu Restaurante. Incluye carta digital, sistema de reservas con confirmación por email, panel de administración para gestionar platos y reservas, y cancelación mediante enlace firmado.
 
 ## Funcionalidades
 
